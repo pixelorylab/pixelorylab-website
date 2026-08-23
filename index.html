@@ -3,96 +3,1965 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pixelorylab — Coming Soon</title>
+<title>Pixelorylab — Motion for SaaS</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="shortcut icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#ffffff;
-    --ink:#0a0a0a;
-    --ink-dim:#4a4a4a;
+    --ink:#0b0b0c;
+    --gray-700:#4a4a4d;
+    --gray-500:#8a8a8e;
+    --gray-300:#d8d8da;
+    --gray-100:#eeeeef;
+    --line:#e3e3e5;
+    --paper:#f3f3f1;
+    --paper-2:#fafaf9;
+    --radius-xl:28px;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-full:999px;
+    --maxw:1440px;
+    --pad:40px;
   }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{
-    height:100%;
-    background:var(--bg);
-    background-image:
-      radial-gradient(circle at 1px 1px, rgba(0,0,0,0.12) 1px, transparent 0);
-    background-size:24px 24px;
-    overflow:hidden;
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  .hero, .hero *, #siteFooter, #siteFooter *{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
   }
+  .hero .sf-bold{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',sans-serif;font-weight:700;}
+  .hero .sf-medium{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',sans-serif;font-weight:500;}
   body{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-family:'Archivo Black', sans-serif;
-  }
-  .stage{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    padding:5vw;
-  }
-  .logo{
-    width:56px;
-    height:56px;
-    margin-bottom:2.2rem;
-    opacity:0;
-    animation:fadeUp 0.9s ease forwards 0.1s;
-  }
-  h1{
-    font-family:'Anton', sans-serif;
-    font-weight:400;
-    text-transform:uppercase;
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',sans-serif;
     color:var(--ink);
-    font-size:clamp(3.5rem, 16vw, 18rem);
-    line-height:0.88;
-    letter-spacing:-0.01em;
-    white-space:nowrap;
-    opacity:0;
-    animation:fadeUp 0.9s ease forwards 0.3s;
+    background-color:#efefec;
+    background-image:
+      radial-gradient(1200px 600px at 15% 0%, #ffffff 0%, transparent 60%),
+      linear-gradient(180deg,#f7f7f5 0%, #efefec 100%);
+    background-size:auto, auto;
+    background-position:0 0, 0 0;
+    background-repeat:no-repeat, no-repeat;
+    background-attachment:scroll, scroll;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    zoom:1.02;
+    transition:background .2s ease;
   }
-  .wordmark{
-    margin-top:2.4rem;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:0.4rem;
-    opacity:0;
-    animation:fadeUp 0.9s ease forwards 0.55s;
+  body.portfolio-active{
+    background-color:#ffffff;
+    background-image:none;
   }
+
+  /* ===== dotted background canvas (reacts to cursor) ===== */
+  #dotField{
+    position:fixed;inset:0;z-index:-1;
+    width:100%;height:100%;
+    pointer-events:none;
+  }
+
+  /* ===== custom cursor ===== */
+  @media (hover:hover) and (pointer:fine){
+    body.custom-cursor-on, body.custom-cursor-on *{cursor:none !important;}
+  }
+  #cursorDot{
+    position:fixed;top:0;left:0;z-index:10000;
+    pointer-events:none;
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    mix-blend-mode:difference;
+    width:14px;height:14px;
+    background:#fff;
+    transition:width .18s cubic-bezier(.22,1,.36,1), height .18s cubic-bezier(.22,1,.36,1), opacity .2s ease;
+  }
+  body.cursor-hover #cursorDot{width:22px;height:22px;}
+  body.cursor-hidden #cursorDot{opacity:0;}
+  a{color:inherit;text-decoration:none;}
+  img{display:block;max-width:100%;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad);}
+
+  /* ===== PAGE LOADER ===== */
+  html.is-loading, html.is-loading body{overflow:hidden;height:100%;}
+  #pageLoader{
+    position:fixed;inset:0;z-index:9999;
+    display:flex;align-items:center;justify-content:center;
+    background:
+      radial-gradient(1200px 600px at 15% 0%, #ffffff 0%, transparent 60%),
+      linear-gradient(180deg,#f7f7f5 0%, #efefec 100%);
+    transform:translateY(0);
+    transition:transform .9s cubic-bezier(.76,0,.24,1);
+    will-change:transform;
+  }
+  #pageLoader.loader-hide{transform:translateY(-100%);}
+  #pageLoader.loader-below{transform:translateY(100%);}
+  #pageLoader.no-anim{transition:none !important;}
+  .loader-mark{
+    width:120px;height:120px;
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;transform:scale(.85);
+    animation:loader-logo-in .6s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay:.15s;
+  }
+  .loader-mark img{width:100%;height:100%;object-fit:contain;}
+  @keyframes loader-logo-in{
+    to{opacity:1;transform:scale(1);}
+  }
+
+  /* ===== NAV ===== */
+  .nav-outer{position:sticky;top:0;z-index:100;padding:20px var(--pad) 0;}
+  .nav{
+    max-width:fit-content;
+    margin:0 auto;
+    background:#ffffff;
+    border-radius:var(--radius-full);
+    display:flex;align-items:center;gap:8px;
+    padding:8px 8px 8px 10px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
+    transition:box-shadow .3s ease, transform .3s ease;
+  }
+  .nav.scrolled{box-shadow:0 2px 6px rgba(0,0,0,.06), 0 16px 40px rgba(0,0,0,.08);}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em;font-size:15px;}
+  .mark{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;background:transparent;}
+  .mark img{width:100%;height:100%;object-fit:cover;}
+  .mark svg{width:16px;height:16px;}
+
+  .nav-links{display:flex;align-items:center;gap:4px;}
+  .nav-icon{
+    display:inline-flex;align-items:center;
+    height:38px;border-radius:var(--radius-full);
+    padding:0 11px;
+    color:var(--gray-500);
+    background:transparent;
+    transition:background .25s ease,color .25s ease,padding .25s ease;
+  }
+  .nav-icon svg{width:17px;height:17px;stroke:currentColor;flex-shrink:0;}
+  .nav-icon .nav-label{
+    max-width:0;opacity:0;overflow:hidden;white-space:nowrap;
+    font-size:13px;font-weight:600;
+    transition:max-width .25s ease,opacity .2s ease,margin .25s ease;
+  }
+  .nav-icon:hover{
+    background:var(--gray-100);color:var(--ink);
+    padding:0 14px 0 12px;
+  }
+  .nav-icon:hover .nav-label{
+    max-width:100px;opacity:1;margin-left:8px;
+  }
+  .nav-icon.active{
+    background:var(--gray-100);color:var(--ink);
+  }
+
+  .nav-cta{
+    background:var(--ink);color:#fff;
+    padding:10px 20px;border-radius:var(--radius-full);
+    font-size:13px;font-weight:600;white-space:nowrap;
+    transition:transform .2s ease,background .2s ease;
+  }
+  .nav-cta:hover{transform:translateY(-1px);background:#222;}
+
+  /* ===== PORTFOLIO PAGE ===== */
+  .portfolio-view{
+    display:none;
+    background:#ffffff;color:var(--ink);
+  }
+  .portfolio-view.show{display:block;}
+  .portfolio-wrap{padding:0 var(--pad) 100px;max-width:1738px;margin-top:-56px;}
+  .portfolio-head{text-align:center;padding:0 0 48px 0;}
+  .portfolio-head .eyebrow{margin-bottom:16px;}
+  .portfolio-head h1{font-size:72px;font-weight:800;letter-spacing:-0.02em;}
+  .cs-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);
+    gap:40px 28px;padding-bottom:64px;
+  }
+  .cs-visual{
+    position:relative;
+    width:100%;aspect-ratio:16/10;border-radius:20px;
+    background:#ffffff;
+    display:flex;align-items:center;justify-content:center;
+    color:transparent;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    margin-bottom:22px;overflow:hidden;
+    box-shadow:0 0 0 1px var(--line) inset;
+  }
+  .cs-visual::after{
+    content:"";
+    position:absolute;inset:0;z-index:5;
+    border-radius:inherit;
+    pointer-events:none;
+    box-shadow:0 0 0 1px var(--gray-300) inset;
+    opacity:0;
+    transition:opacity .2s ease;
+  }
+  .cs-visual:hover::after{
+    opacity:1;
+  }
+
+  .cs-video{
+    position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;display:none;
+  }
+  .cs-tile.has-video .cs-visual{color:transparent;}
+  .cs-tile.has-video .cs-video{display:block;}
+  .cs-mute-btn{
+    position:absolute;bottom:16px;right:16px;z-index:2;
+    background:#fff;color:var(--ink);border:none;
+    border-radius:var(--radius-full);padding:9px 16px;font-size:12px;font-weight:700;
+    display:flex;align-items:center;gap:6px;cursor:pointer;
+    box-shadow:0 6px 18px rgba(0,0,0,.18);
+    transition:transform .15s ease;
+  }
+  .cs-mute-btn:hover{transform:scale(1.05);}
+  /* Buttons with border-radius have "dead" corners for clicks — the browser
+     hit-tests to the visual rounded shape, so clicks near the corners fall
+     through to whatever is behind (here, the video). This invisible square
+     hit-target fills those corners in so the entire button is clickable. */
+  .cs-mute-btn::before{content:"";position:absolute;inset:0;border-radius:0;}
+  .cs-tile h3{font-size:19px;font-weight:700;margin-bottom:5px;}
+  .cs-tile p{font-size:14px;color:var(--gray-500);line-height:1.4;}
+  .portfolio-cta{text-align:center;padding:20px 0 30px 0;}
+  .portfolio-cta h2{font-size:32px;font-weight:700;margin-bottom:26px;}
+
+  @media(max-width:900px){
+    .portfolio-head h1{font-size:44px;}
+  }
+  @media(max-width:520px){
+    .cs-grid{grid-template-columns:1fr;}
+    .portfolio-wrap{padding:40px 20px 80px;}
+  }
+
+  /* ===== PROCESS ===== */
+  #process{padding:15px 0 100px;scroll-margin-top:110px;}
+  .process-head{max-width:640px;margin:0 auto 52px;text-align:center;}
+  .process-eyebrow{display:flex;align-items:center;justify-content:center;gap:14px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gray-500);margin-bottom:22px;}
+  .process-eyebrow span{width:26px;height:1px;background:var(--line);display:inline-block;}
+  .process-head h2{font-size:48px;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-bottom:16px;}
+  .process-head p{font-size:15px;color:var(--gray-700);line-height:1.6;max-width:440px;margin:0 auto;}
+
+  .process-timeline{position:relative;max-width:860px;margin:0 auto;padding-left:32px;}
+  .process-spine{
+    position:absolute;left:0;top:6px;bottom:6px;width:1px;
+    background:var(--line);
+  }
+  .process-spine-fill{
+    position:absolute;left:0;top:0;width:100%;height:0;
+    background:linear-gradient(180deg,#3b6bff,rgba(59,107,255,.15));
+    transition:height 1.5s cubic-bezier(.22,1,.36,1);
+  }
+  .process-timeline.in .process-spine-fill{height:100%;}
+
+  .process-step{position:relative;padding-bottom:22px;}
+  .process-step:last-child{padding-bottom:0;}
+
+  .process-card{
+    position:relative;
+    background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius-lg);
+    padding:36px 34px 26px;overflow:hidden;
+    opacity:0;transform:translateY(18px);
+    transition:opacity .6s ease, transform .6s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+  .process-step.in .process-card{opacity:1;transform:translateY(0);}
+  .process-card:hover{border-color:var(--gray-300);box-shadow:0 14px 32px rgba(0,0,0,.05);}
+
+  .process-ghost{
+    position:absolute;top:22px;right:30px;
+    font-size:56px;font-weight:800;letter-spacing:-.02em;
+    color:var(--gray-100);line-height:1;pointer-events:none;
+    font-family:'Inter',sans-serif;
+  }
+  .process-tag{
+    font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+    font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:#3b6bff;margin-bottom:20px;position:relative;
+  }
+  .process-card h3{font-size:26px;font-weight:700;letter-spacing:-.01em;margin-bottom:12px;position:relative;}
+  .process-card p{font-size:14.5px;color:var(--gray-700);line-height:1.65;position:relative;max-width:560px;}
+
+  .process-meta{
+    display:flex;flex-wrap:wrap;gap:22px 40px;
+    margin-top:26px;padding-top:18px;border-top:1px solid var(--line);
+    position:relative;
+  }
+  .process-meta-item{display:flex;align-items:baseline;gap:12px;max-width:420px;}
+  .process-meta-item .m-label{
+    font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+    font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gray-500);white-space:nowrap;
+  }
+  .process-meta-item .m-fill{flex:1;min-width:32px;border-bottom:1px dotted var(--gray-300);height:0;margin-bottom:4px;}
+  .process-meta-item .m-value{
+    font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+    font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;
+  }
+
+  @media (max-width:860px){
+    .process-head h2{font-size:32px;}
+    .process-card{padding:28px 22px 22px;}
+    .process-card h3{font-size:22px;}
+    .process-ghost{font-size:42px;top:18px;right:20px;}
+    .process-meta{flex-direction:column;gap:14px;}
+    .process-meta-item{min-width:0;}
+  }
+
+
+  /* ===== SECTION SPACING ===== */
+  section{padding:110px 0;}
   .eyebrow{
-    font-size:0.62rem;
-    letter-spacing:0.35em;
-    color:var(--ink-dim);
-    text-transform:uppercase;
+    font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--gray-500);margin-bottom:23px;
   }
-  .brand{
-    font-size:clamp(1rem, 2.4vw, 1.5rem);
-    letter-spacing:0.14em;
-    color:var(--ink);
-    text-transform:uppercase;
+
+  /* ===== HERO ===== */
+  .hero{padding-top:128px;padding-bottom:70px;position:relative;overflow:hidden;}
+  #services{padding-top:20px;padding-bottom:60px;}
+  #work{padding-top:40px;padding-bottom:50px;}
+  .hero-inner{position:relative;width:100%;}
+  .hero-graphic{
+    position:absolute;top:-114px;right:-40px;width:646px;height:646px;
+    pointer-events:none;
   }
-  @keyframes fadeUp{
-    from{opacity:0; transform:translateY(14px);}
-    to{opacity:1; transform:translateY(0);}
+  .hero-graphic .shape-glow{
+    position:absolute;inset:0;
+    background:radial-gradient(circle at 55% 45%, rgba(75,63,240,0.08), transparent 65%);
+    filter:blur(10px);
   }
+  .hero-graphic .shape-cube{
+    position:absolute;left:57%;top:20%;width:250px;height:250px;
+    border-radius:32px;
+    background:linear-gradient(135deg,#ffffff, #eceae4 60%, #dcdad2);
+    box-shadow:
+      0 44px 80px -24px rgba(0,0,0,0.15),
+      inset 0 1px 0 rgba(255,255,255,0.8);
+    border:1px solid #e2e0d9;
+    animation:float-cube 7s ease-in-out infinite;
+  }
+  .hero-graphic .shape-cube:before{
+    content:"";
+    position:absolute;
+    inset:20px;
+    border-radius:18px;
+    background:linear-gradient(135deg,#f6f5f1,#dedcd4);
+  }
+  .hero-graphic .shape-disc{
+    position:absolute;left:27%;top:80%;width:170px;height:170px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#ffffff,#e5e3dc);
+    box-shadow:
+      0 32px 56px -20px rgba(0,0,0,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+    border:1px solid #e2e0d9;
+    animation:float-disc 8s ease-in-out infinite;
+  }
+  .hero-graphic .shape-chip{
+    position:absolute;left:78%;top:88%;width:92px;height:92px;
+    border-radius:20px;
+    background:#111;
+    box-shadow:0 24px 40px -16px rgba(0,0,0,0.3);
+    animation:float-chip 6.5s ease-in-out infinite;
+  }
+  @keyframes float-cube{
+    0%,100%{transform:translateY(0) rotate(12deg);}
+    50%{transform:translateY(-16px) rotate(16deg);}
+  }
+  @keyframes float-disc{
+    0%,100%{transform:translateY(0) translateX(0);}
+    50%{transform:translateY(14px) translateX(-8px);}
+  }
+  @keyframes float-chip{
+    0%,100%{transform:translateY(0) rotate(-8deg);}
+    50%{transform:translateY(-12px) rotate(-4deg);}
+  }
+  h1.headline{
+    font-size:125px;line-height:0.94;font-weight:800;letter-spacing:-0.035em;
+    max-width:1100px;
+  }
+  h1.headline .muted{color:var(--gray-500);}
+  .sf-bold{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',sans-serif;font-weight:700;}
+  .sf-medium{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',sans-serif;font-weight:500;}
+  .hero-sub{
+    max-width:560px;margin-top:42px;font-size:17px;line-height:1.6;color:var(--gray-700);
+  }
+  .hero-cta{display:flex;align-items:center;gap:28px;margin-top:53px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--ink);color:#fff;
+    padding:15px 24px;border-radius:var(--radius-full);
+    font-size:14px;font-weight:600;
+    border:none;cursor:pointer;
+    transition:transform .25s ease, background .25s ease;
+  }
+  .btn:hover{transform:translateY(-2px);background:#222;}
+  .btn.light{background:#fff;color:var(--ink);}
+  .btn.light:hover{background:#f0f0f0;}
+  .link-arrow{font-size:14px;font-weight:600;color:var(--gray-700);display:inline-flex;align-items:center;gap:8px;}
+  .link-arrow:hover{color:var(--ink);}
+  .hr{border:none;border-top:1px solid var(--line);margin-top:105px;}
+
+  /* ===== FEATURED VIDEO PANEL ===== */
+  .feature-head{display:flex;justify-content:space-between;align-items:baseline;margin-top:150px;margin-bottom:24px;}
+  .feature-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gray-500);}
+  .feature-tag{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-500);}
+  .video-panel{
+    position:relative;width:100%;aspect-ratio:16/8.2;
+    border-radius:var(--radius-xl);
+    background:linear-gradient(160deg,#050506 0%,#0e0f13 55%,#141821 100%);
+    overflow:hidden;display:flex;align-items:center;justify-content:center;
+    filter:blur(var(--hero-blur, 0px));
+    will-change:filter;
+  }
+  .video-panel .glow{
+    position:absolute;inset:0;
+    background:radial-gradient(600px 300px at 30% 70%, rgba(90,110,160,.25), transparent 70%);
+  }
+  .feature-video{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;
+  }
+  .mute-pill{
+    position:absolute;bottom:22px;right:22px;z-index:2;
+    background:rgba(255,255,255,.12);backdrop-filter:blur(6px);
+    color:#fff;border:1px solid rgba(255,255,255,.25);
+    border-radius:var(--radius-full);padding:9px 16px;font-size:12px;
+    display:flex;align-items:center;gap:6px;cursor:pointer;
+    font-family:inherit;
+  }
+  .float-tooltip{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    background:linear-gradient(90deg,#8b5cf6,#f59e0b);
+    border-radius:16px;padding:2px;
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+    animation:float 4s ease-in-out infinite;
+  }
+  @keyframes float{0%,100%{transform:translate(-50%,-50%) translateY(0);}50%{transform:translate(-50%,-50%) translateY(-10px);}}
+  .float-tooltip-inner{background:#0e0f13;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:280px;}
+  .float-tooltip-status{display:flex;align-items:center;gap:8px;font-size:12px;color:#f0c674;}
+  .float-tooltip-row{background:#fff;border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#111;font-weight:500;}
+  .float-tooltip-row span.circ{width:26px;height:26px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;}
+
+  /* ===== VALUE SECTION ===== */
+  .value-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;}
+  .value-grid h2{font-size:52px;line-height:1.08;font-weight:700;letter-spacing:-.02em;}
+  .value-copy{font-size:16px;line-height:1.7;color:var(--gray-700);max-width:420px;margin-top:6px;}
+
+  @media(max-width:820px){
+    .value-grid{grid-template-columns:1fr;}
+    h1.headline{font-size:56px;}
+    .hero-graphic{display:none;}
+  }
+
+  /* ===== PROJECTS ===== */
+  .proj-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px;}
+  .proj-head h2{font-size:60px;font-weight:800;letter-spacing:-.02em;}
+  .count-pill{border:1px solid var(--line);border-radius:var(--radius-full);padding:8px 18px;font-size:12px;font-weight:700;color:var(--gray-700);height:fit-content;}
+
+  .proj-grid{display:grid;grid-template-columns:1.69fr 1fr;gap:18px;}
+  .proj-card-big{grid-row:span 1;}
+  .proj-thumb{
+    position:relative;border-radius:var(--radius-xl);overflow:hidden;
+    background:#0a0a0b;aspect-ratio:16/13.5;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .proj-thumb.small{aspect-ratio:16/9;}
+  .proj-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .proj-mark{width:90px;height:90px;opacity:.9;}
+  .proj-video{
+    position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;display:none;
+  }
+  .proj-thumb.has-video .proj-mark{display:none;}
+  .proj-thumb.has-video .proj-video{display:block;}
+  .proj-poster-img{
+    position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;z-index:1;pointer-events:none;
+  }
+  /* the Wise logo sits high in its source video/poster — cover-crop was
+     leaving it hugging the top edge, so nudge the visible crop down a bit */
+  .proj-thumb[data-project="Wise"] .proj-video,
+  .proj-thumb[data-project="Wise"] .proj-poster-img{
+    object-position:center 68%;
+  }
+  .proj-mute{
+    position:absolute;bottom:16px;right:16px;z-index:2;
+    background:#fff;color:var(--ink);border:none;
+    border-radius:var(--radius-full);padding:9px 16px;font-size:12px;font-weight:700;
+    display:flex;align-items:center;gap:6px;cursor:pointer;
+    box-shadow:0 6px 18px rgba(0,0,0,.18);
+    transition:transform .15s ease;
+  }
+  .proj-mute:hover{transform:scale(1.05);}
+  .proj-mute::before{content:"";position:absolute;inset:0;border-radius:0;}
+  .proj-meta{margin-top:22px;}
+  .proj-meta h3{font-size:26px;font-weight:800;}
+  .proj-cat{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-500);margin:10px 0 4px;}
+  .proj-desc{font-size:14px;color:var(--gray-700);}
+
+  .proj-col-right{display:flex;flex-direction:column;gap:53px;}
+  .grid-collage{
+    position:relative;overflow:hidden;
+    display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
+    background:var(--paper);border-radius:var(--radius-xl);padding:18px;
+    aspect-ratio:16/9;
+  }
+  .grid-collage.has-video .collage-ball{opacity:0;}
+  .grid-collage.has-video .proj-video{display:block;}
+  .collage-ball{border-radius:50%;background:radial-gradient(circle at 30% 30%, #d7d7d7, #9a9a9a);}
+  .collage-ball.center{
+    background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;
+  }
+
+  @media(max-width:900px){
+    .proj-grid{grid-template-columns:1fr;}
+    .proj-head{flex-direction:column;align-items:flex-start;gap:16px;}
+    .proj-head h2{font-size:42px;}
+    /* on desktop proj-col-right's 53px gap separates two stacked tiles in a
+       narrow column; once everything drops to one column on mobile that
+       reads as a much bigger jump than the 18px gap above it. Match them. */
+    .proj-grid{gap:32px;}
+    .proj-col-right{gap:32px;}
+  }
+
+  /* ===== SERVICES ===== */
+  .svc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:56px;gap:40px;}
+  .svc-head h2{font-size:52px;font-weight:800;letter-spacing:-.02em;}
+  .svc-head p{font-size:15px;color:var(--gray-700);max-width:260px;padding-top:8px;}
+
+  .svc-row{
+    display:grid;grid-template-columns:56px 1fr 1.3fr auto;align-items:center;gap:36px;
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-lg);
+    padding:36px 40px;margin-bottom:20px;
+    transition:background .25s ease, transform .25s ease;
+  }
+  .svc-row:hover{background:var(--paper-2);transform:translateX(4px);}
+  .svc-num{
+    width:52px;height:52px;border-radius:50%;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--gray-500);
+  }
+  .svc-row h3{font-size:34px;font-weight:800;}
+  .svc-row p{font-size:14.5px;color:var(--gray-700);line-height:1.6;}
+  .svc-best{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-500);text-align:right;line-height:1.6;}
+
+  @media(max-width:900px){
+    .svc-row{grid-template-columns:1fr;text-align:left;gap:14px;padding:26px;}
+    .svc-best{text-align:left;}
+    .svc-head{flex-direction:column;gap:14px;}
+  }
+
+  /* ===== OFFERS ===== */
+  #offers{padding:0 0 130px;scroll-margin-top:110px;}
+  .offers-head{max-width:640px;margin:0 auto 60px;text-align:center;}
+  .offers-eyebrow{display:flex;align-items:center;justify-content:center;gap:14px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gray-500);margin-bottom:22px;}
+  .offers-eyebrow span{width:26px;height:1px;background:var(--line);display:inline-block;}
+  .offers-head h2{font-size:52px;font-weight:800;letter-spacing:-.02em;line-height:1.08;margin-bottom:18px;}
+  .offers-head p{font-size:15px;color:var(--gray-700);line-height:1.6;}
+
+  /* ===== FAQ ===== */
+  #faq{padding:0 0 130px;scroll-margin-top:110px;}
+  .faq-grid{display:grid;grid-template-columns:0.85fr 1.15fr;gap:80px;align-items:start;}
+  .faq-eyebrow{display:flex;align-items:center;gap:14px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gray-500);margin-bottom:26px;}
+  .faq-eyebrow span{width:26px;height:1px;background:var(--line);display:inline-block;}
+  .faq-left h2{font-size:52px;font-weight:800;letter-spacing:-.02em;line-height:1.06;margin-bottom:22px;}
+  .faq-left h2 .dim{color:var(--gray-300);}
+  .faq-left p{font-size:15px;color:var(--gray-700);line-height:1.6;max-width:400px;}
+  .faq-list{border-top:1px solid var(--line);}
+  .faq-item{border-bottom:1px solid var(--line);}
+  .faq-q{
+    width:100%;background:none;border:none;cursor:pointer;
+    display:flex;align-items:center;gap:22px;
+    padding:26px 4px;text-align:left;color:var(--ink);
+    font-family:inherit;
+  }
+  .faq-num{font-size:12px;font-weight:600;color:var(--gray-500);flex-shrink:0;width:20px;}
+  .faq-q h3{flex:1;font-size:18px;font-weight:700;letter-spacing:-.01em;}
+  .faq-plus{
+    position:relative;width:18px;height:18px;flex-shrink:0;
+  }
+  .faq-plus::before,.faq-plus::after{
+    content:"";position:absolute;background:var(--gray-500);
+    top:50%;left:50%;transform:translate(-50%,-50%);
+    transition:transform .3s ease,background .3s ease;
+  }
+  .faq-plus::before{width:14px;height:1.5px;}
+  .faq-plus::after{width:1.5px;height:14px;}
+  .faq-item.open .faq-plus::after{transform:translate(-50%,-50%) rotate(90deg);opacity:0;}
+  .faq-item.open .faq-plus::before{background:var(--ink);}
+  .faq-item.open .faq-q h3{color:var(--ink);}
+  .faq-a{
+    max-height:0;overflow:hidden;
+    transition:max-height .35s ease;
+  }
+  .faq-a-inner{padding:0 4px 26px 42px;font-size:14.5px;line-height:1.65;color:var(--gray-700);max-width:520px;}
+  @media (max-width:860px){
+    .faq-grid{grid-template-columns:1fr;gap:36px;}
+    .faq-left p{max-width:none;}
+    .faq-left h2{font-size:38px;}
+  }
+
+  .offers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch;}
+  .offer-card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius-lg);padding:32px 28px;display:flex;flex-direction:column;position:relative;}
+  .offer-tag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-500);margin-bottom:22px;}
+  .offer-card h3{font-size:22px;font-weight:800;letter-spacing:-.01em;margin-bottom:8px;}
+  .offer-desc{font-size:13.5px;color:var(--gray-700);line-height:1.55;margin-bottom:24px;}
+  .offer-list{list-style:none;margin-bottom:32px;flex:1;}
+  .offer-list li{position:relative;padding-left:26px;font-size:13.5px;color:var(--gray-700);margin-bottom:12px;line-height:1.4;}
+  .offer-list li::before{content:"";position:absolute;left:0;top:1px;width:16px;height:16px;border-radius:50%;background:var(--gray-100);}
+  .offer-list li::after{content:"";position:absolute;left:5px;top:5px;width:6px;height:3px;border-left:1.5px solid var(--gray-700);border-bottom:1.5px solid var(--gray-700);transform:rotate(-45deg);}
+  .offer-link{font-size:13px;font-weight:600;color:var(--ink);display:inline-flex;align-items:center;gap:6px;margin-top:auto;}
+  .offer-link span{transition:transform .2s ease;display:inline-block;}
+  .offer-link:hover span{transform:translate(2px,-2px);}
+
+  .offer-card-featured{background:linear-gradient(160deg,#25446f,#0e2138);border-color:transparent;color:#fff;}
+  .offer-card-featured .offer-tag{color:rgba(255,255,255,.55);}
+  .offer-card-featured h3{color:#fff;}
+  .offer-card-featured .offer-desc{color:rgba(255,255,255,.72);}
+  .offer-card-featured .offer-list li{color:rgba(255,255,255,.85);}
+  .offer-card-featured .offer-list li::before{background:rgba(255,255,255,.14);}
+  .offer-card-featured .offer-list li::after{border-color:#fff;}
+  .offer-card-featured .offer-link{color:#fff;}
+  .offer-badge{position:absolute;top:24px;right:24px;background:rgba(255,255,255,.14);color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:var(--radius-full);}
+
+  @media(max-width:900px){
+    .offers-grid{grid-template-columns:1fr;}
+    .offers-head h2{font-size:38px;}
+  }
+
+  /* ===== CTA ===== */
+  .cta-panel{
+    position:relative;border-radius:var(--radius-xl);
+    background:linear-gradient(0deg, #efece2 0%, #e2ded2 6%, #cac6ba 13%, #aaa79d 20%, #87847c 28%, #67655f 36%, #4a4845 44%, #333230 52%, #22211f 60%, #171614 68%, #100f0e 76%, #0a0a0b 88%, #0a0a0b 100%);
+    color:#fff;
+    padding:90px 60px;overflow:hidden;
+  }
+  .cta-graphic{position:absolute;top:50%;right:60px;transform:translateY(-50%);width:480px;height:480px;pointer-events:none;}
+  .cta-graphic svg{width:100%;height:100%;}
+  .cta-graphic .cta-shape-cube{
+    position:absolute;left:36%;top:6%;width:180px;height:180px;
+    border-radius:32px;
+    background:linear-gradient(135deg,#3a3a3d,#222224 60%,#141416);
+    box-shadow:
+      0 44px 80px -24px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    border:1px solid #2c2c2f;
+    animation:float-cube 7s ease-in-out infinite;
+  }
+  .cta-graphic .cta-shape-cube:before{
+    content:"";
+    position:absolute;
+    inset:20px;
+    border-radius:18px;
+    background:linear-gradient(135deg,#313133,#1a1a1c);
+  }
+  .cta-graphic .cta-shape-disc{
+    position:absolute;left:6%;top:58%;width:150px;height:150px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#333336,#161618);
+    box-shadow:
+      0 32px 56px -20px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    border:1px solid #2c2c2f;
+    animation:float-disc 8s ease-in-out infinite;
+  }
+  .cta-graphic .cta-shape-chip{
+    position:absolute;left:64%;top:66%;width:82px;height:82px;
+    border-radius:20px;
+    background:#ffffff;
+    box-shadow:0 24px 40px -16px rgba(0,0,0,0.4);
+    animation:float-chip 6.5s ease-in-out infinite;
+  }
+  .cta-eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9a9a9d;margin-bottom:22px;}
+  .cta-panel h2{font-size:76px;font-weight:800;line-height:1.0;letter-spacing:-.02em;max-width:640px;margin-bottom:48px;}
+
+  @media(max-width:900px){
+    .cta-panel{padding:60px 30px;}
+    .cta-panel h2{font-size:44px;}
+    .cta-graphic{display:none;}
+  }
+
+  /* ===== FOOTER ===== */
+  footer{padding:20px var(--pad) 60px;}
+  .footer-card{
+    max-width:var(--maxw);margin:0 auto;
+    padding:24px 0 0;
+    border-top:1px solid var(--line);
+  }
+  .footer-top{text-align:center;padding-bottom:56px;}
+  .footer-logo{width:150px;height:150px;margin:0 auto -24px;display:flex;align-items:center;justify-content:center;}
+  .footer-logo img{width:100%;height:100%;object-fit:contain;}
+  .footer-tagline{font-size:32px;font-weight:700;letter-spacing:-0.015em;line-height:1.25;max-width:620px;margin:0 auto;color:var(--ink);}
+  .footer-cols{
+    display:flex;justify-content:space-between;gap:40px;
+    padding-bottom:40px;border-bottom:1px solid var(--line);flex-wrap:wrap;
+  }
+  .footer-desc{font-size:14px;color:var(--gray-500);max-width:230px;line-height:1.55;}
+  .footer-col-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-500);margin-bottom:18px;}
+  .footer-col a{display:block;font-size:14px;color:var(--gray-700);margin-bottom:13px;transition:color .2s ease;}
+  .footer-col a:hover{color:var(--ink);}
+  .footer-bottom{
+    display:flex;justify-content:space-between;align-items:center;
+    padding-top:28px;font-size:12.5px;color:var(--gray-500);flex-wrap:wrap;gap:12px;
+  }
+  .footer-bottom a{color:var(--gray-500);transition:color .2s ease;}
+  .footer-bottom a:hover{color:var(--ink);}
+  .footer-bottom-links{display:flex;gap:24px;}
+
+  @media(max-width:700px){
+    .footer-card{padding:48px 0 0;}
+    .footer-tagline{font-size:24px;}
+    .footer-cols{gap:32px 20px;}
+  }
+
+  /* ===== FLOATING CTA ===== */
+  .floating-cta{
+    position:fixed;bottom:26px;right:26px;z-index:200;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+
+  /* reveal animation */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+
   @media (prefers-reduced-motion: reduce){
-    .logo,h1,.wordmark{animation:none; opacity:1;}
+    *{animation:none !important;transition:none !important;}
   }
+
+  /* ===== MOBILE OPTIMIZATION ===== */
+  @media(max-width:900px){
+    .value-grid h2{font-size:40px;}
+  }
+
+  @media(max-width:640px){
+    :root{--pad:20px;}
+
+    /* --- nav: the icon row + CTA no longer fit their desktop widths on a phone --- */
+    .nav-outer{padding:14px var(--pad) 0;}
+    .nav{width:100%;max-width:100%;padding:6px 6px 6px 8px;gap:6px;justify-content:space-between;}
+    .nav-links{gap:0;}
+    .nav-icon{padding:0 8px;height:36px;}
+    .nav-icon svg{width:16px;height:16px;}
+    .nav-cta{padding:9px 14px;font-size:12.5px;white-space:nowrap;}
+
+    /* --- vertical rhythm: 110px section padding is desktop-scaled --- */
+    section{padding:64px 0;}
+    .hero{padding-top:104px;padding-bottom:44px;}
+    #services{padding-top:8px;padding-bottom:36px;}
+    #work{padding-top:20px;padding-bottom:32px;}
+    #process{padding:8px 0 56px;}
+    #offers{padding:0 0 72px;}
+    #faq{padding:0 0 72px;}
+    .hr{margin-top:56px;}
+    .feature-head{margin-top:64px;}
+
+    /* --- hero: headline was still 56px, and the CTA row could overflow --- */
+    h1.headline{font-size:38px;letter-spacing:-.02em;}
+    .hero-sub{font-size:15px;margin-top:24px;}
+    .hero-cta{flex-wrap:wrap;gap:16px 24px;margin-top:32px;}
+    .btn{padding:13px 20px;font-size:13px;}
+
+    /* --- section headings, scaled down one more step for phone widths --- */
+    .process-head h2{font-size:28px;}
+    .svc-head h2,.offers-head h2,.faq-left h2{font-size:30px;}
+    .proj-head h2{font-size:32px;}
+    .cta-panel h2{font-size:34px;}
+    .portfolio-head h1{font-size:34px;}
+    .footer-tagline{font-size:20px;}
+
+    /* --- the floating "Start a project" pill duplicates the nav CTA and can
+       collide with the mute buttons on video tiles at the same screen corner --- */
+    .floating-cta{display:none;}
+
+    /* --- slightly larger tap targets on touch screens --- */
+    .cs-mute-btn,.proj-mute,.mute-pill{padding:10px 14px;}
+  }
+
+  
 </style>
 </head>
 <body>
-  <div class="stage">
-    <img class="logo" src="data:image/png;base64,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" alt="Pixelorylab logo">
-    <h1>Coming Soon</h1>
-    <div class="wordmark">
-      <span class="eyebrow">Motion Studio</span>
-      <span class="brand">Pixelorylab</span>
+<script>document.documentElement.classList.add('is-loading');</script>
+
+<canvas id="dotField"></canvas>
+<div id="cursorDot"></div>
+
+<div id="pageLoader">
+  <div class="loader-mark">
+    <img src="Pl logo.png" alt="Pixelorylab">
+  </div>
+</div>
+
+<div class="nav-outer">
+  <nav class="nav" id="mainNav">
+    <a href="#top" class="mark">
+      <img src="Pl logo.png" alt="Pixelorylab">
+    </a>
+    <div class="nav-links">
+      <a href="#top" class="nav-icon active" id="navHome" data-view="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        <span class="nav-label">Home</span>
+      </a>
+      <a href="#portfolio" class="nav-icon" id="navPortfolio" data-view="portfolio">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <span class="nav-label">Portfolio</span>
+      </a>
+      <a href="#process" class="nav-icon" id="navProcess" data-view="process">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20v-10M18 20v-3M9 8l3-5 3 5"/><circle cx="12" cy="4" r="1.4" fill="currentColor" stroke="none"/></svg>
+        <span class="nav-label">Process</span>
+      </a>
+      <a href="#offers" class="nav-icon" id="navOffers" data-view="offers">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L3 3v6.59a2 2 0 0 0 .59 1.41l9.59 9.59a2 2 0 0 0 2.82 0l6.59-6.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+        <span class="nav-label">Offers</span>
+      </a>
+      <a href="#faq" class="nav-icon" id="navFaq" data-view="faq">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.8-2.2 2.1-2.4 3.6"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg>
+        <span class="nav-label">FAQ</span>
+      </a>
+    </div>
+    <a href="#book" id="navBookCall" class="nav-cta">Book<span class="nav-cta-full"> a Call</span></a>
+  </nav>
+</div>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="hero-graphic">
+        <div class="shape-glow"></div>
+        <div class="shape-cube"></div>
+        <div class="shape-disc"></div>
+        <div class="shape-chip"></div>
+      </div>
+
+      <div class="eyebrow reveal">Independent motion studio · SaaS</div>
+      <h1 class="headline reveal"><span class="sf-bold">Your product's first impression —</span><br><span class="muted sf-medium">engineered in motion.</span></h1>
+      <p class="hero-sub reveal">We craft launch videos, product demos, and explainers that make ambitious software easier to understand — and impossible to scroll past.</p>
+
+      <div class="hero-cta reveal">
+        <a href="https://tally.so/r/RGrypl" target="_blank" rel="noopener" class="btn">Start a project <span>→</span></a>
+        <a href="#work" class="link-arrow">See selected work <span>↓</span></a>
+      </div>
+
+      <hr class="hr">
+
+      <div class="feature-head">
+        <div class="feature-label">Featured work</div>
+        <div class="feature-tag">Motion Reel · 2026</div>
+      </div>
+
+      <div class="video-panel reveal load-reveal">
+        <video class="feature-video" src="wise.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <div class="glow"></div>
+        <button class="mute-pill" type="button">Unmute film</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="wrap">
+      <div class="svc-head reveal">
+        <div>
+          <div class="eyebrow">Services</div>
+          <h2>What do we offer?</h2>
+        </div>
+      </div>
+
+      <div class="svc-row reveal">
+        <div class="svc-num">01</div>
+        <h3>Launch Video</h3>
+        <p>A cinematic flagship video built to give your release clarity, confidence, and a real sense of occasion — the kind audiences actually remember.</p>
+        <div class="svc-best">Best for launches and<br>big updates</div>
+      </div>
+
+      <div class="svc-row reveal">
+        <div class="svc-num">02</div>
+        <h3>Product Demo</h3>
+        <p>A focused, visually sharp walkthrough that shows your product in motion — making the experience feel clear, useful, and effortless to follow.</p>
+        <div class="svc-best">Best for product pages<br>and sales</div>
+      </div>
+
+      <div class="svc-row reveal">
+        <div class="svc-num">03</div>
+        <h3>Explainer Video</h3>
+        <p>A clear visual story that turns complex features and ideas into moments that click instantly for any viewer.</p>
+        <div class="svc-best">Best for onboarding<br>and campaigns</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VALUE -->
+  <section id="work">
+    <div class="wrap">
+      <div class="proj-head reveal">
+        <div>
+          <div class="eyebrow" style="margin-bottom:10px;">Selected work</div>
+          <h2>Recent projects</h2>
+        </div>
+        <div class="count-pill">03 projects</div>
+      </div>
+
+      <div class="proj-grid">
+        <div class="proj-card-big reveal">
+          <div class="proj-thumb" data-project="Liistoapp">
+            <svg class="proj-mark" viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="46" stroke="white" stroke-width="4"/>
+              <path d="M72 28 L34 72" stroke="white" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+            <video class="proj-video" muted loop playsinline preload="metadata"></video>
+            <button class="proj-mute" type="button">Play</button>
+          </div>
+          <div class="proj-meta">
+            <h3>Liistoapp</h3>
+            <div class="proj-cat">Featured explainer</div>
+            <div class="proj-desc">Product launch</div>
+          </div>
+        </div>
+
+        <div class="proj-col-right">
+          <div class="reveal">
+            <div class="proj-thumb small" data-project="Wise" style="background:linear-gradient(160deg,#7fb8e0,#3f6ea0);">
+              <video class="proj-video" muted loop playsinline preload="metadata"></video>
+              <button class="proj-mute" type="button">Play</button>
+            </div>
+            <div class="proj-meta">
+              <h3>Wise</h3>
+              <div class="proj-cat">Spec ad</div>
+              <div class="proj-desc">Personal project</div>
+            </div>
+          </div>
+
+          <div class="reveal">
+            <div class="grid-collage" data-project="Flowerpot">
+              <div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball"></div>
+              <div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball center">Idea</div><div class="collage-ball"></div><div class="collage-ball"></div>
+              <div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball"></div>
+              <video class="proj-video" muted loop playsinline preload="metadata"></video>
+              <button class="proj-mute" type="button">Play</button>
+            </div>
+            <div class="proj-meta">
+              <h3>Flowerpot</h3>
+              <div class="proj-cat">Product story</div>
+              <div class="proj-desc">Brand story animation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section id="process">
+    <div class="wrap">
+      <div class="process-head reveal">
+        <div class="process-eyebrow"><span></span>Process<span></span></div>
+        <h2>How a launch<br>actually gets built.</h2>
+        <p>Three phases, no agency theatre — just the work it takes to get your product its moment.</p>
+      </div>
+
+      <div class="process-timeline" id="processTimeline">
+        <div class="process-spine"><div class="process-spine-fill"></div></div>
+
+        <div class="process-step">
+          <div class="process-card">
+            <span class="process-ghost">01</span>
+            <div class="process-tag">Phase 01 / Discovery</div>
+            <h3>Understand the product</h3>
+            <p>We get into your product, your audience, and what this launch needs to do — then map the direction: tone, story, format, channels.</p>
+            <div class="process-meta">
+              <div class="process-meta-item">
+                <span class="m-label">Deliverable</span>
+                <span class="m-fill"></span>
+                <span class="m-value">Brief + creative direction</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="process-step">
+          <div class="process-card">
+            <span class="process-ghost">02</span>
+            <div class="process-tag">Phase 02 / Direction</div>
+            <h3>Script &amp; storyboard</h3>
+            <p>We write a tight, retentive script and storyboard it scene-by-scene, locking voice and music early — so nothing about the edit is a surprise later.</p>
+            <div class="process-meta">
+              <div class="process-meta-item">
+                <span class="m-label">Deliverable</span>
+                <span class="m-fill"></span>
+                <span class="m-value">Script + storyboard</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="process-step">
+          <div class="process-card">
+            <span class="process-ghost">03</span>
+            <div class="process-tag">Phase 03 / Craft</div>
+            <h3>Motion &amp; delivery</h3>
+            <p>Careful, frame-by-frame motion design — composition, pacing, sound — built to carry a story and push real numbers in the channels you run.</p>
+            <div class="process-meta">
+              <div class="process-meta-item">
+                <span class="m-label">Deliverable</span>
+                <span class="m-fill"></span>
+                <span class="m-value">Final film + masters</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OFFERS -->
+  <section id="offers">
+    <div class="wrap">
+      <div class="offers-head reveal">
+        <div class="offers-eyebrow"><span></span>Our offers<span></span></div>
+        <h2>What we build, and how.</h2>
+        <p>Built intentionally to carry a story — and to push real numbers in the channels you actually run.</p>
+      </div>
+
+      <div class="offers-grid reveal">
+        <div class="offer-card">
+          <div class="offer-tag">01 / Per project</div>
+          <h3>Product Launch Video</h3>
+          <p class="offer-desc">Your product or feature launch should land with weight.</p>
+          <ul class="offer-list">
+            <li>30–45s film</li>
+            <li>Scripting + storyboarding</li>
+            <li>3 revisions included</li>
+            <li>Voiceover included</li>
+          </ul>
+          <a href="https://calendly.com/pixelorylab/30min" target="_blank" rel="noopener" class="offer-link">Book a call <span>↗</span></a>
+        </div>
+
+        <div class="offer-card">
+          <div class="offer-tag">02 / Per project</div>
+          <h3>Product Explainer</h3>
+          <p class="offer-desc">A longer cut for showing the product in actual use.</p>
+          <ul class="offer-list">
+            <li>60–75s film</li>
+            <li>Scripting + storyboarding</li>
+            <li>5 revisions included</li>
+            <li>Voiceover included</li>
+          </ul>
+          <a href="https://calendly.com/pixelorylab/30min" target="_blank" rel="noopener" class="offer-link">Book a call <span>↗</span></a>
+        </div>
+
+        <div class="offer-card offer-card-featured">
+          <div class="offer-badge">Retainer</div>
+          <div class="offer-tag">03 / Flagship</div>
+          <h3>Ad Creatives — Bulk</h3>
+          <p class="offer-desc">Built specifically to drive conversions across paid channels.</p>
+          <ul class="offer-list">
+            <li>30–40s creatives on a cadence</li>
+            <li>9:16 and 16:9, both included</li>
+            <li>3 revisions per piece</li>
+            <li>Tuned for high-performance ads</li>
+            <li>Retainer — discounted per-video rate</li>
+          </ul>
+          <a href="https://calendly.com/pixelorylab/30min" target="_blank" rel="noopener" class="offer-link">Book a call <span>↗</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="faq-grid">
+        <div class="faq-left reveal">
+          <div class="faq-eyebrow"><span></span>FAQ</div>
+          <h2>Common<br><span class="dim">questions.</span></h2>
+          <p>Quick answers about services, pricing, and how we work — so you can decide whether to book a call.</p>
+        </div>
+
+        <div class="faq-list reveal">
+          <div class="faq-item">
+            <button class="faq-q">
+              <span class="faq-num">01</span>
+              <h3>What does Pixelorylab specialize in?</h3>
+              <span class="faq-plus"></span>
+            </button>
+            <div class="faq-a">
+              <div class="faq-a-inner">We specialize in motion graphics and video editing for SaaS brands, launch videos, product explainers, and ad creatives built to perform across your marketing channels.</div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q">
+              <span class="faq-num">02</span>
+              <h3>Who do you typically work with?</h3>
+              <span class="faq-plus"></span>
+            </button>
+            <div class="faq-a">
+              <div class="faq-a-inner">Mostly SaaS founders and marketing teams, along with branding studios and creators who need consistent, high-quality video content on a recurring basis. We built this service specifically for pre Series A SaaS companies that need premium looking content without enterprise budgets or long agency timelines.</div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q">
+              <span class="faq-num">03</span>
+              <h3>How does your process work?</h3>
+              <span class="faq-plus"></span>
+            </button>
+            <div class="faq-a">
+              <div class="faq-a-inner">After your 60% deposit, we send a structured intake form where you share your brief, brand assets, UI references (Figma links or screenshots), and any inspiration videos. Script is optional at this stage. We then build a full Figma storyboard and refine the script with you. Before production begins, we hop on a short finalization call to confirm everything looks right. We then edit the full video, you get one revision round via Frame.io, and we deliver the final file.</div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q">
+              <span class="faq-num">04</span>
+              <h3>What do you need from us to get started?</h3>
+              <span class="faq-plus"></span>
+            </button>
+            <div class="faq-a">
+              <div class="faq-a-inner">Your brief, brand assets (logo, fonts, colors, brand guidelines), any UI references such as Figma links or screenshots of your product, and inspiration videos that match the style you're after. A script is optional, if you don't have one, we'll write it together.</div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q">
+              <span class="faq-num">05</span>
+              <h3>How long does a project take?</h3>
+              <span class="faq-plus"></span>
+            </button>
+            <div class="faq-a">
+              <div class="faq-a-inner">Each video is delivered within 10 business days of receiving your completed assets, with rush delivery in 5 business days available for an additional flat fee. Retainer work runs on an ongoing cadence we agree on upfront.</div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q">
+              <span class="faq-num">06</span>
+              <h3>How many revisions are included?</h3>
+              <span class="faq-plus"></span>
+            </button>
+            <div class="faq-a">
+              <div class="faq-a-inner">One revision round is included on every project. You review the draft via Frame.io and leave timestamped comments, we apply your changes and deliver the final file. Additional revision rounds are available for a flat fee.</div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q">
+              <span class="faq-num">07</span>
+              <h3>How much does it cost?</h3>
+              <span class="faq-plus"></span>
+            </button>
+            <div class="faq-a">
+              <div class="faq-a-inner">Project based pricing runs from $800 to $5,500 per video depending on complexity and the editor assigned. Retainer plans start at $6,000 per month for four videos a month with priority turnaround. Get in touch for a quote.</div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q">
+              <span class="faq-num">08</span>
+              <h3>Can you handle ongoing content needs?</h3>
+              <span class="faq-plus"></span>
+            </button>
+            <div class="faq-a">
+              <div class="faq-a-inner">Yes, our retainer offer is built for exactly this, with a steady cadence of videos and ad creatives at a discounted per-video rate and priority turnaround.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOOK A CALL (Cal.com) -->
+  <section id="book" style="padding-top:0;scroll-margin-top:110px;">
+    <div class="wrap">
+      <div class="offers-head">
+        <div class="offers-eyebrow"><span></span>Apply to work with us<span></span></div>
+        <h2>Let's talk about<br><span class="dim">your project.</span></h2>
+        <p>Pick a time that works for you. We'll walk through your goals, the type of video you need, and what the process looks like from there.</p>
+      </div>
+      <div style="max-width:1100px;margin:0 auto;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);background:#fff;padding-top:20px;">
+        <div id="cal-inline-booking" style="width:100%;height:100%;overflow:auto;"></div>
+      </div>
+    </div>
+  </section>
+  <script type="text/javascript">
+    (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+    Cal("init", "30min", {origin:"https://cal.com"});
+
+    Cal.ns["30min"]("inline", {
+      elementOrSelector:"#cal-inline-booking",
+      config: {"layout":"month_view", "theme":"light"},
+      calLink: "adi-hjpcbf/30min",
+    });
+
+    Cal.ns["30min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view","theme":"light"});
+  </script>
+
+  </main>
+
+<footer id="siteFooter">
+  <div class="footer-card">
+    <div class="footer-top">
+      <div class="footer-logo">
+        <img src="Pl logo.png" alt="Pixelorylab">
+      </div>
+      <div class="footer-tagline">For ambitious products.<br>Told better.</div>
+    </div>
+
+    <div class="footer-cols">
+      <div class="footer-col">
+        <div class="footer-desc">Product storytelling for SaaS, AI &amp; tech.</div>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-label">Sections</div>
+        <a href="#work">Work</a>
+        <a href="#offers">Offers</a>
+        <a href="#portfolio" id="footerPortfolioLink">Portfolio</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-label">Get in touch</div>
+        <a href="https://x.com/Pixelorylab" target="_blank" rel="noopener">X / Twitter</a>
+        <a href="https://www.instagram.com/pixelorylab/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://calendly.com/pixelorylab/30min" target="_blank" rel="noopener">Book a call</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© Pixelorylab 2026 — All rights reserved.</div>
+      <div class="footer-bottom-links">
+        <a href="mailto:pixelorylab@gmail.com">Email</a>
+        <a href="https://www.instagram.com/pixelorylab/" target="_blank" rel="noopener">Instagram</a>
+        <a href="#top" id="footerBackTop">Back to top ↑</a>
+      </div>
     </div>
   </div>
+</footer>
+
+<!-- PORTFOLIO PAGE -->
+<section id="portfolioView" class="portfolio-view">
+  <div class="wrap portfolio-wrap">
+    <div class="portfolio-head">
+      <div class="eyebrow">Selected Work</div>
+      <h1>Case studies</h1>
+    </div>
+
+    <div class="cs-grid" id="csGrid">
+      <div class="cs-tile" data-project="1">
+        <div class="cs-visual">Project thumbnail<video class="cs-video" muted loop playsinline preload="metadata"></video><button class="cs-mute-btn" type="button">Unmute</button></div>
+        <h3 class="cs-title">Project name</h3>
+        <p class="cs-desc">One-line description of the work</p>
+      </div>
+      <div class="cs-tile" data-project="2">
+        <div class="cs-visual">Project thumbnail<video class="cs-video" muted loop playsinline preload="metadata"></video><button class="cs-mute-btn" type="button">Unmute</button></div>
+        <h3 class="cs-title">Project name</h3>
+        <p class="cs-desc">One-line description of the work</p>
+      </div>
+      <div class="cs-tile" data-project="3">
+        <div class="cs-visual">Project thumbnail<video class="cs-video" muted loop playsinline preload="metadata"></video><button class="cs-mute-btn" type="button">Unmute</button></div>
+        <h3 class="cs-title">Project name</h3>
+        <p class="cs-desc">One-line description of the work</p>
+      </div>
+      <div class="cs-tile" data-project="4">
+        <div class="cs-visual">Project thumbnail<video class="cs-video" muted loop playsinline preload="metadata"></video><button class="cs-mute-btn" type="button">Unmute</button></div>
+        <h3 class="cs-title">Project name</h3>
+        <p class="cs-desc">One-line description of the work</p>
+      </div>
+      <div class="cs-tile" data-project="5">
+        <div class="cs-visual">Project thumbnail<video class="cs-video" muted loop playsinline preload="metadata"></video><button class="cs-mute-btn" type="button">Unmute</button></div>
+        <h3 class="cs-title">Project name</h3>
+        <p class="cs-desc">One-line description of the work</p>
+      </div>
+      <div class="cs-tile" data-project="6">
+        <div class="cs-visual">Project thumbnail<video class="cs-video" muted loop playsinline preload="metadata"></video><button class="cs-mute-btn" type="button">Unmute</button></div>
+        <h3 class="cs-title">Project name</h3>
+        <p class="cs-desc">One-line description of the work</p>
+      </div>
+      <div class="cs-tile" data-project="7">
+        <div class="cs-visual">Project thumbnail<video class="cs-video" muted loop playsinline preload="metadata"></video><button class="cs-mute-btn" type="button">Unmute</button></div>
+        <h3 class="cs-title">Project name</h3>
+        <p class="cs-desc">One-line description of the work</p>
+      </div>
+      <div class="cs-tile" data-project="8">
+        <div class="cs-visual">Project thumbnail<video class="cs-video" muted loop playsinline preload="metadata"></video><button class="cs-mute-btn" type="button">Unmute</button></div>
+        <h3 class="cs-title">Project name</h3>
+        <p class="cs-desc">One-line description of the work</p>
+      </div>
+    </div>
+
+    <div class="portfolio-cta">
+      <h2>Have something worth launching?</h2>
+      <a href="https://tally.so/r/RGrypl" target="_blank" rel="noopener" class="btn">Get in touch</a>
+    </div>
+  </div>
+</section>
+
+<a href="https://tally.so/r/RGrypl" target="_blank" rel="noopener" class="btn floating-cta" id="floatingCta">Start a project →</a>
+
+<script>
+  // ===== PAGE LOADER =====
+  (function(){
+    const loader = document.getElementById('pageLoader');
+    if(!loader) return;
+    const SLIDE_DURATION = 900;  // matches the #pageLoader transition duration
+    const HOLD_TIME = 800;      // ms the off-white screen + logo sit before sliding up
+    const MIN_SHOW_TIME = HOLD_TIME;
+    const start = Date.now();
+
+    const hide = () => {
+      const elapsed = Date.now() - start;
+      const wait = Math.max(MIN_SHOW_TIME - elapsed, 0);
+      setTimeout(() => {
+        loader.classList.add('loader-hide');
+        document.documentElement.classList.remove('is-loading');
+        // loader is kept in the DOM (just slid out of view) so the same
+        // slide-up reveal can be replayed for in-page nav transitions
+      }, wait);
+    };
+    if(document.readyState === 'complete') hide();
+    else window.addEventListener('load', hide);
+  })();
+
+  // ============================================================
+  // PROJECT VIDEOS — edit this block only.
+  //
+  // 1. Make a folder named "videos" next to this HTML file.
+  // 2. Drop your .mp4 files in it (any name you like).
+  // 3. Type the filename below for each slot.
+  //    Leave "file" as "" to keep the placeholder look for a slot
+  //    you haven't finished yet.
+  //
+  // Every tile (Home page "Recent projects" AND the Portfolio page
+  // "Case studies" grid) autoplays its video muted and on loop once
+  // it loads. A "Unmute / Mute" pill in the bottom-right corner
+  // toggles the sound — unmuting one tile automatically mutes any
+  // other tile that's playing, so you never get overlapping audio.
+  // Scrolling a tile out of view pauses it and mutes it again.
+  // ============================================================
+
+  // Home page — "Recent projects" section.
+  // "poster" is the thumbnail image shown by default before someone
+  // clicks Play — add a matching image file to your images/ folder
+  // and set its filename here (leave blank to show no thumbnail image).
+  const HOME_PROJECT_VIDEOS = {
+    Liistoapp:  { file: "liisto.mp4", poster: "liistoapp thumbnail.png" },
+    Wise:  { file: "wise.mp4", poster: "wise thumb.png" },
+    Flowerpot: { file: "flowerpot.mp4", poster: "flower thumb.png" }
+  };
+
+  // Portfolio page — "Case studies" grid
+  const PROJECT_VIDEOS = {
+    1: { file: "liisto.mp4", title: "Liistoapp", desc: "Product Launch Video" },
+    2: { file: "wise.mp4", title: "Wise", desc: "Personal Project" },
+    3: { file: "flowerpot.mp4", title: "Flowerpot.nyc", desc: "Motion Graphics Video for the Hero Page of Website" },
+    4: { file: "11labs marketplace.mp4", title: "Elevenlabs", desc: "Personal Project" },
+    5: { file: "chatgpt.mp4", title: "Chatgpt", desc: "Personal Project" },
+    6: { file: "spotify 2.0.mp4", title: "Spotify 2.0", desc: "Personal Project" },
+    7: { file: "claude.mp4", title: "Claude", desc: "Personal Project" },
+    8: { file: "notion sfx.mp4", title: "Notion", desc: "Personal Project" }
+  };
+
+  // tracks every wired-up video so unmuting one can mute the rest
+  const allWiredVideos = [];
+
+  // shared wiring logic used by every video tile on the site.
+  // opts.playGate (optional) is a function that must return true before
+  // this tile is allowed to actually call .play() — used to guarantee
+  // Portfolio-grid videos can never start until the Portfolio page is
+  // the visible/active view, no matter how fast their metadata loads
+  // or when the scroll observer fires.
+  function wireVideoTile(tile, cfg, opts) {
+    const video = tile.querySelector(opts.videoSelector);
+    const ctrlBtn = tile.querySelector(opts.btnSelector);
+    const hasVideoTarget = opts.hasVideoTarget ? tile.querySelector(opts.hasVideoTarget) : tile;
+    const canPlay = opts.playGate || (() => true);
+    const controlType = opts.controlType || 'mute';
+
+    // for playpause tiles: a still poster image layered above the video.
+    // Native <video poster> only ever shows before the very first play —
+    // once a video has played and is then paused, browsers show the last
+    // video frame instead of snapping back to the poster. This overlay
+    // gives us an instant, reliable "back to thumbnail" on pause/stop.
+    let posterImg = null;
+    if (controlType === 'playpause' && cfg && cfg.poster) {
+      posterImg = document.createElement('img');
+      posterImg.className = 'proj-poster-img';
+      posterImg.alt = '';
+      posterImg.src = cfg.poster;
+      tile.appendChild(posterImg);
+    }
+
+    function setMuteState(isMuted) {
+      video.muted = isMuted;
+      ctrlBtn.innerHTML = isMuted ? 'Unmute' : 'Mute';
+    }
+
+    function setPlayState(isPlaying) {
+      ctrlBtn.innerHTML = isPlaying ? 'Stop' : 'Play';
+      if (posterImg) posterImg.style.display = isPlaying ? 'none' : 'block';
+    }
+
+    function attemptPlay() {
+      if (canPlay()) {
+        video.play().catch(() => {});
+        if (controlType === 'playpause') setPlayState(true);
+      }
+    }
+
+    if (!cfg || !cfg.file) {
+      // no video filename set for this slot yet — button stays visible,
+      // but clicking it just tells you what's missing instead of doing nothing
+      ctrlBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.warn('No video file set for this slot yet — add one in the PROJECT_VIDEOS / HOME_PROJECT_VIDEOS config at the top of the script.');
+      });
+      return;
+    }
+
+    video.src = cfg.file;
+    video.muted = true;
+    if (cfg.poster) video.poster = cfg.poster; // thumbnail shown before playback starts
+    video.load();
+
+    // if the file doesn't exist / hasn't been added yet, fall back to
+    // the placeholder look instead of breaking the layout — but log
+    // why, so a typo or missing file is easy to spot
+    video.addEventListener('error', () => {
+      hasVideoTarget.classList.remove('has-video');
+      console.warn('Could not load video: "' + cfg.file + '". Check the file exists in your videos/ folder, the filename matches exactly, and you\'re viewing this page through a local server (not by double-clicking the file).');
+    }, { once: true });
+
+    video.addEventListener('loadedmetadata', () => {
+      hasVideoTarget.classList.add('has-video');
+      if (controlType === 'mute') attemptPlay();
+      // playpause tiles: metadata/poster is ready, but playback only
+      // starts once the button is clicked — never automatically
+    }, { once: true });
+
+    if (controlType === 'playpause') {
+      setPlayState(false); // thumbnail shown by default, nothing plays until clicked
+
+      function togglePlay() {
+        if (video.paused) {
+          // stop every other playpause tile first so audio doesn't overlap
+          allWiredVideos.forEach(entry => {
+            if (entry.video !== video && entry.controlType === 'playpause') {
+              entry.video.pause();
+              if (entry.setPlayState) entry.setPlayState(false);
+            }
+          });
+          video.muted = false; // plays with audio once clicked
+          video.play().catch(() => {});
+          setPlayState(true);
+        } else {
+          video.pause();
+          setPlayState(false);
+        }
+      }
+
+      ctrlBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        togglePlay();
+      });
+
+      // the whole tile is clickable too, not just the small corner pill —
+      // e.stopPropagation() on the button above keeps a button click from
+      // double-firing this.
+      tile.style.cursor = 'pointer';
+      tile.addEventListener('click', togglePlay);
+    } else {
+      setMuteState(true);
+
+      ctrlBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const goingUnmuted = video.muted;
+        if (goingUnmuted) {
+          // unmuting this one — mute every other tile so audio doesn't overlap
+          allWiredVideos.forEach(entry => {
+            if (entry.video !== video && entry.setMuteState) entry.setMuteState(true);
+          });
+        }
+        setMuteState(!goingUnmuted);
+        if (video.paused) attemptPlay();
+      });
+    }
+
+    // pause once the tile scrolls out of view; playpause tiles stay
+    // paused until clicked again — they never auto-resume on scroll-in
+    const stopIO = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          video.pause();
+          if (controlType === 'playpause') setPlayState(false);
+          else if (!video.muted) setMuteState(true);
+        } else if (controlType === 'mute') {
+          attemptPlay();
+        }
+      });
+    }, { threshold: 0 });
+    stopIO.observe(tile);
+
+    allWiredVideos.push({
+      video,
+      controlType,
+      setMuteState: controlType === 'mute' ? setMuteState : null,
+      setPlayState: controlType === 'playpause' ? setPlayState : null
+    });
+  }
+
+  // wire up Portfolio page "Case studies" grid — deferred until the
+  // Portfolio page is actually opened (via navbar or a direct link),
+  // so these videos don't start downloading/playing in the background
+  // while someone is just browsing the Home page. Titles/descriptions
+  // still get filled in immediately so there's no flash of placeholder
+  // text once the page opens.
+  document.querySelectorAll('#csGrid .cs-tile').forEach(tile => {
+    const id = tile.dataset.project;
+    const cfg = PROJECT_VIDEOS[id];
+    if (!cfg) return;
+
+    const titleEl = tile.querySelector('.cs-title');
+    const descEl = tile.querySelector('.cs-desc');
+    if (cfg.title) titleEl.textContent = cfg.title;
+    if (cfg.desc) descEl.textContent = cfg.desc;
+  });
+
+  let portfolioVideosInitialized = false;
+  function initPortfolioVideos() {
+    if (portfolioVideosInitialized) return;
+    portfolioVideosInitialized = true;
+
+    document.querySelectorAll('#csGrid .cs-tile').forEach(tile => {
+      const id = tile.dataset.project;
+      const cfg = PROJECT_VIDEOS[id];
+      if (!cfg) return;
+
+      wireVideoTile(tile, cfg, {
+        videoSelector: '.cs-video',
+        btnSelector: '.cs-mute-btn',
+        playGate: () => document.body.classList.contains('portfolio-active')
+      });
+    });
+  }
+
+  // wire up Home page "Recent projects"
+  document.querySelectorAll('.proj-thumb[data-project], .grid-collage[data-project]').forEach(tile => {
+    const cfg = HOME_PROJECT_VIDEOS[tile.dataset.project];
+    wireVideoTile(tile, cfg, { videoSelector: '.proj-video', btnSelector: '.proj-mute', controlType: 'playpause' });
+  });
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const q = item.querySelector('.faq-q');
+    const a = item.querySelector('.faq-a');
+    q.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(openItem => {
+        if(openItem !== item){
+          openItem.classList.remove('open');
+          openItem.querySelector('.faq-a').style.maxHeight = null;
+        }
+      });
+      if(isOpen){
+        item.classList.remove('open');
+        a.style.maxHeight = null;
+      } else {
+        item.classList.add('open');
+        a.style.maxHeight = a.scrollHeight + 'px';
+      }
+    });
+  });
+
+  // sticky nav shadow
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    if(window.scrollY > 20) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  });
+
+  // hero featured-video blur-to-clear on scroll (hero only)
+  const heroVideoPanel = document.querySelector('.hero .video-panel');
+  if(heroVideoPanel){
+    const HERO_BLUR_MAX = 12.6;    // px of blur at the very top of the page
+    const HERO_BLUR_RANGE = 320;   // px of scroll before it's fully sharp
+    let heroBlurTicking = false;
+    const updateHeroBlur = () => {
+      const progress = Math.min(Math.max(window.scrollY / HERO_BLUR_RANGE, 0), 1);
+      const blur = HERO_BLUR_MAX * (1 - progress);
+      heroVideoPanel.style.setProperty('--hero-blur', blur.toFixed(2) + 'px');
+      heroBlurTicking = false;
+    };
+    window.addEventListener('scroll', () => {
+      if(!heroBlurTicking){
+        requestAnimationFrame(updateHeroBlur);
+        heroBlurTicking = true;
+      }
+    }, {passive:true});
+    updateHeroBlur();
+  }
+
+  // featured video panel — starts muted+looping automatically; pill toggles sound
+  const featureVideo = document.querySelector('.video-panel .feature-video');
+  const featureMutePill = document.querySelector('.video-panel .mute-pill');
+  if(featureVideo && featureMutePill){
+    featureVideo.play().catch(() => {});
+    featureMutePill.addEventListener('click', () => {
+      featureVideo.muted = !featureVideo.muted;
+      featureMutePill.textContent = featureVideo.muted ? 'Unmute film' : 'Mute film';
+    });
+  }
+
+  // scroll reveal
+  const revealEls = document.querySelectorAll('.reveal:not(.load-reveal)');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold:0.15});
+  revealEls.forEach(el => io.observe(el));
+
+  // process timeline — staggered step reveal + spine fill
+  const processTimeline = document.getElementById('processTimeline');
+  if(processTimeline){
+    const steps = Array.from(processTimeline.querySelectorAll('.process-step'));
+    const processIO = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if(e.isIntersecting){
+          processTimeline.classList.add('in');
+          steps.forEach((step, i) => {
+            setTimeout(() => step.classList.add('in'), i * 140);
+          });
+          processIO.disconnect();
+        }
+      });
+    }, {threshold:0.2});
+    processIO.observe(processTimeline);
+  }
+
+
+  // reveal immediately on load, in sync with hero content
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.load-reveal').forEach(el => el.classList.add('in'));
+    });
+  });
+
+  // ===== VIEW SWITCHING (Home / Portfolio) =====
+  const mainEl = document.getElementById('top');
+  const footerEl = document.getElementById('siteFooter');
+  const floatingCta = document.getElementById('floatingCta');
+  const portfolioView = document.getElementById('portfolioView');
+  const navHome = document.getElementById('navHome');
+  const navPortfolio = document.getElementById('navPortfolio');
+
+  function showView(view){
+    if(view === 'portfolio'){
+      mainEl.style.display = 'none';
+      footerEl.style.display = 'none';
+      floatingCta.style.display = 'none';
+      portfolioView.classList.add('show');
+      document.body.classList.add('portfolio-active');
+      setTimeout(initPortfolioVideos, 1000);
+      navPortfolio.classList.add('active');
+      navHome.classList.remove('active');
+      history.replaceState(null, '', '#portfolio');
+    } else {
+      portfolioView.classList.remove('show');
+      document.body.classList.remove('portfolio-active');
+      mainEl.style.display = '';
+      footerEl.style.display = '';
+      floatingCta.style.display = '';
+      navHome.classList.add('active');
+      navPortfolio.classList.remove('active');
+      history.replaceState(null, '', '#top');
+    }
+    window.scrollTo(0, 0);
+  }
+
+  // ===== reuse the page-load slide-up reveal for in-page nav clicks =====
+  const pageLoaderEl = document.getElementById('pageLoader');
+  const NAV_SLIDE_DURATION = 900; // matches #pageLoader's CSS transition duration
+  const NAV_HOLD_TIME = 500;      // ms the logo sits once fully covering, before revealing
+
+  function navigateTo(view, scrollTargetId){
+    if(!pageLoaderEl){
+      showView(view);
+      if(scrollTargetId){
+        const el = document.getElementById(scrollTargetId);
+        if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+      return;
+    }
+
+    // position the loader just below the viewport, instantly, no transition
+    pageLoaderEl.classList.add('no-anim');
+    pageLoaderEl.classList.remove('loader-hide');
+    pageLoaderEl.classList.add('loader-below');
+    void pageLoaderEl.offsetHeight; // force reflow so the snap applies before transitions re-enable
+    pageLoaderEl.classList.remove('no-anim');
+
+    // slide up from the bottom to cover the screen (logo rides along)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        pageLoaderEl.classList.remove('loader-below');
+      });
+    });
+
+    // once fully covered and held for a beat, swap the view underneath,
+    // jump straight to the target section while still hidden, then slide
+    // up again (off the top) to reveal it already in place
+    setTimeout(() => {
+      showView(view);
+      if(scrollTargetId){
+        const el = document.getElementById(scrollTargetId);
+        if(el) el.scrollIntoView({behavior:'instant', block:'start'});
+      }
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          pageLoaderEl.classList.add('loader-hide');
+        });
+      });
+    }, NAV_SLIDE_DURATION + NAV_HOLD_TIME);
+  }
+
+  navPortfolio.addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateTo('portfolio');
+  });
+  navHome.addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateTo('home');
+  });
+  const navProcess = document.getElementById('navProcess');
+  navProcess.addEventListener('click', (e) => {
+    e.preventDefault();
+    // Process always plays the full slide-up transition/reveal, whether coming
+    // from the Portfolio view or scrolling to it again from the Home page.
+    navigateTo('home', 'process');
+  });
+  const navOffers = document.getElementById('navOffers');
+  navOffers.addEventListener('click', (e) => {
+    e.preventDefault();
+    if(document.body.classList.contains('portfolio-active')){
+      // currently on the Portfolio view — switch to Home instantly, then just scroll to Offers
+      showView('home');
+      requestAnimationFrame(() => {
+        document.getElementById('offers').scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    } else {
+      document.getElementById('offers').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  });
+  const navFaq = document.getElementById('navFaq');
+  navFaq.addEventListener('click', (e) => {
+    e.preventDefault();
+    if(document.body.classList.contains('portfolio-active')){
+      // currently on the Portfolio view — switch to Home instantly, then just scroll to FAQ
+      showView('home');
+      requestAnimationFrame(() => {
+        document.getElementById('faq').scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    } else {
+      document.getElementById('faq').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  });
+  const navBookCall = document.getElementById('navBookCall');
+  navBookCall.addEventListener('click', (e) => {
+    e.preventDefault();
+    // Book a Call also always plays the full slide-up transition/reveal.
+    navigateTo('home', 'book');
+  });
+  document.getElementById('footerBackTop').addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateTo('home');
+  });
+  const footerPortfolioLink = document.getElementById('footerPortfolioLink');
+  if(footerPortfolioLink){
+    footerPortfolioLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo('portfolio');
+    });
+  }
+
+  if(window.location.hash === '#portfolio'){
+    showView('portfolio');
+  }
+</script>
+
+<script>
+(function(){
+  var isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  /* ---------- reactive dotted background ---------- */
+  var canvas = document.getElementById('dotField');
+  var ctx = canvas.getContext('2d');
+  var DPR = Math.min(window.devicePixelRatio || 1, 2);
+  var SPACING = 14;              // px between dots
+  var BASE_R = 1.15;             // resting dot radius
+  var MAX_R = 1.9;               // dot radius right under the cursor
+  var INFLUENCE = 90;            // px radius of reactive zone
+  var PUSH = 3;                  // max px a dot shifts away from the cursor
+  var cw = 0, ch = 0;            // css px
+  var baseImg = null;            // cached static pattern
+  var lastBox = null;            // last redrawn reactive rect, for clearing
+
+  function resize(){
+    cw = window.innerWidth;
+    ch = window.innerHeight;
+    canvas.width = Math.round(cw * DPR);
+    canvas.height = Math.round(ch * DPR);
+    canvas.style.width = cw + 'px';
+    canvas.style.height = ch + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    drawBase();
+  }
+
+  function drawBase(){
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.fillStyle = 'rgba(0,0,0,.06)';
+    for(var y = 0; y <= ch + SPACING; y += SPACING){
+      for(var x = 0; x <= cw + SPACING; x += SPACING){
+        ctx.beginPath();
+        ctx.arc(x, y, BASE_R, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    baseImg = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    lastBox = null;
+  }
+
+  function restoreBox(box){
+    if(!baseImg || !box) return;
+    var sx = Math.max(0, Math.round(box.x * DPR));
+    var sy = Math.max(0, Math.round(box.y * DPR));
+    var sw = Math.min(canvas.width - sx, Math.round(box.w * DPR));
+    var sh = Math.min(canvas.height - sy, Math.round(box.h * DPR));
+    if(sw <= 0 || sh <= 0) return;
+    ctx.putImageData(baseImg, 0, 0, sx, sy, sw, sh);
+  }
+
+  function drawReactive(px, py){
+    var pad = INFLUENCE + PUSH + MAX_R + 2;
+    var box = {
+      x: px - pad, y: py - pad,
+      w: pad * 2, h: pad * 2
+    };
+    restoreBox(lastBox);
+    restoreBox(box);
+    lastBox = box;
+
+    var startX = Math.floor((box.x) / SPACING) * SPACING;
+    var startY = Math.floor((box.y) / SPACING) * SPACING;
+    ctx.fillStyle = 'rgba(11,11,12,1)';
+    for(var y = startY; y <= box.y + box.h; y += SPACING){
+      if(y < 0 || y > ch) continue;
+      for(var x = startX; x <= box.x + box.w; x += SPACING){
+        if(x < 0 || x > cw) continue;
+        var dx = x - px, dy = y - py;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if(dist >= INFLUENCE) continue;
+        var t = 1 - dist / INFLUENCE;         // 0..1, stronger near cursor
+        var ease = t * t * (3 - 2 * t);        // smoothstep
+        var r = BASE_R + (MAX_R - BASE_R) * ease;
+        var push = ease * PUSH;
+        var ang = Math.atan2(dy, dx);
+        var dxOff = dist > 0.01 ? Math.cos(ang) * push : 0;
+        var dyOff = dist > 0.01 ? Math.sin(ang) * push : 0;
+        ctx.globalAlpha = 0.06 + 0.16 * ease;
+        ctx.beginPath();
+        ctx.arc(x + dxOff, y + dyOff, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  var pointerX = -9999, pointerY = -9999;
+  var lastPointerX = pointerX, lastPointerY = pointerY;
+  var rafPending = false;
+
+  function tick(){
+    rafPending = false;
+    if(pointerX !== lastPointerX || pointerY !== lastPointerY){
+      lastPointerX = pointerX;
+      lastPointerY = pointerY;
+      if(pointerY > -1000){
+        drawReactive(pointerX, pointerY);
+      } else if(lastBox){
+        restoreBox(lastBox);
+        lastBox = null;
+      }
+    }
+  }
+
+  function requestTick(){
+    if(!rafPending){
+      rafPending = true;
+      requestAnimationFrame(tick);
+    }
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+
+  if(isFinePointer){
+    window.addEventListener('mousemove', function(e){
+      pointerX = e.clientX;
+      pointerY = e.clientY;
+      requestTick();
+    }, {passive:true});
+    window.addEventListener('mouseleave', function(){
+      pointerY = -9999;
+      requestTick();
+    });
+  }
+
+  /* ---------- custom cursor ---------- */
+  if(isFinePointer){
+    document.body.classList.add('custom-cursor-on');
+    var dot = document.getElementById('cursorDot');
+    var dotX = window.innerWidth / 2, dotY = window.innerHeight / 2;
+    var targetX = dotX, targetY = dotY;
+    var hasMoved = false;
+
+    document.addEventListener('mousemove', function(e){
+      targetX = e.clientX;
+      targetY = e.clientY;
+      if(!hasMoved){
+        hasMoved = true;
+        document.body.classList.remove('cursor-hidden');
+      }
+    }, {passive:true});
+
+    document.addEventListener('mouseleave', function(){
+      document.body.classList.add('cursor-hidden');
+    });
+    document.addEventListener('mouseenter', function(){
+      if(hasMoved) document.body.classList.remove('cursor-hidden');
+    });
+
+    var HOVER_SELECTOR = 'a, button, input, textarea, select, [role="button"], .btn, .nav-icon, .nav-cta, .offer-link, .link-arrow, .proj-mute, .faq-q';
+    document.addEventListener('mouseover', function(e){
+      if(e.target.closest && e.target.closest(HOVER_SELECTOR)){
+        document.body.classList.add('cursor-hover');
+      }
+    });
+    document.addEventListener('mouseout', function(e){
+      if(e.target.closest && e.target.closest(HOVER_SELECTOR)){
+        document.body.classList.remove('cursor-hover');
+      }
+    });
+
+    function raf(){
+      dotX += (targetX - dotX) * 0.55;
+      dotY += (targetY - dotY) * 0.55;
+      dot.style.left = dotX + 'px';
+      dot.style.top = dotY + 'px';
+      requestAnimationFrame(raf);
+    }
+    document.body.classList.add('cursor-hidden');
+    requestAnimationFrame(raf);
+  }
+})();
+</script>
+
 </body>
 </html>
