@@ -295,7 +295,14 @@
     .process-card h3{font-size:22px;}
     .process-ghost{font-size:42px;top:18px;right:20px;}
     .process-meta{flex-direction:column;gap:14px;}
-    .process-meta-item{min-width:0;}
+    .process-meta-item{
+      min-width:0;max-width:100%;
+      flex-direction:column;align-items:flex-start;gap:6px;
+    }
+    .process-meta-item .m-fill{display:none;}
+    .process-meta-item .m-value{
+      white-space:normal;word-break:break-word;overflow-wrap:break-word;
+    }
   }
 
 
@@ -702,7 +709,13 @@
   @media(max-width:700px){
     .footer-card{padding:48px 0 0;}
     .footer-tagline{font-size:24px;}
-    .footer-cols{gap:32px 20px;}
+    .footer-cols{
+      flex-direction:column;align-items:flex-start;
+      gap:36px;padding-bottom:32px;
+    }
+    .footer-desc{max-width:100%;}
+    .footer-col-label{margin-bottom:14px;}
+    .footer-col a{margin-bottom:11px;}
   }
 
   /* ===== FLOATING CTA ===== */
