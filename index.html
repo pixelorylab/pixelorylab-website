@@ -54,29 +54,16 @@
     background-image:none;
   }
 
-  /* ===== dotted background canvas (reacts to cursor) ===== */
+  /* ===== dotted background (static, no cursor reactivity) ===== */
   #dotField{
     position:fixed;inset:0;z-index:-1;
     width:100%;height:100%;
     pointer-events:none;
+    background-image:radial-gradient(rgba(0,0,0,.06) 1.15px, transparent 1.15px);
+    background-size:14px 14px;
+    background-position:0 0;
   }
 
-  /* ===== custom cursor ===== */
-  @media (hover:hover) and (pointer:fine){
-    body.custom-cursor-on, body.custom-cursor-on *{cursor:none !important;}
-  }
-  #cursorDot{
-    position:fixed;top:0;left:0;z-index:10000;
-    pointer-events:none;
-    border-radius:50%;
-    transform:translate(-50%,-50%);
-    mix-blend-mode:difference;
-    width:14px;height:14px;
-    background:#fff;
-    transition:width .18s cubic-bezier(.22,1,.36,1), height .18s cubic-bezier(.22,1,.36,1), opacity .2s ease;
-  }
-  body.cursor-hover #cursorDot{width:22px;height:22px;}
-  body.cursor-hidden #cursorDot{opacity:0;}
   a{color:inherit;text-decoration:none;}
   img{display:block;max-width:100%;}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad);}
@@ -172,9 +159,10 @@
   .portfolio-view{
     display:none;
     background:#ffffff;color:var(--ink);
+    padding:110px 0 0;
   }
   .portfolio-view.show{display:block;}
-  .portfolio-wrap{padding:0 var(--pad) 100px;max-width:1738px;margin-top:-56px;}
+  .portfolio-wrap{padding:0 var(--pad) 20px;max-width:1738px;margin-top:-56px;}
   .portfolio-head{text-align:center;padding:0 0 48px 0;}
   .portfolio-head .eyebrow{margin-bottom:16px;}
   .portfolio-head h1{font-size:72px;font-weight:800;letter-spacing:-0.02em;}
@@ -226,7 +214,7 @@
   .cs-mute-btn::before{content:"";position:absolute;inset:0;border-radius:0;}
   .cs-tile h3{font-size:19px;font-weight:700;margin-bottom:5px;}
   .cs-tile p{font-size:14px;color:var(--gray-500);line-height:1.4;}
-  .portfolio-cta{text-align:center;padding:20px 0 30px 0;}
+  .portfolio-cta{text-align:center;padding:0 0 64px 0;}
   .portfolio-cta h2{font-size:32px;font-weight:700;margin-bottom:26px;}
 
   @media(max-width:900px){
@@ -234,7 +222,7 @@
   }
   @media(max-width:520px){
     .cs-grid{grid-template-columns:1fr;}
-    .portfolio-wrap{padding:40px 20px 80px;}
+    .portfolio-wrap{padding:40px 20px 20px;}
   }
 
   /* ===== PROCESS ===== */
@@ -721,6 +709,13 @@
   .floating-cta{
     position:fixed;bottom:26px;right:26px;z-index:200;
     box-shadow:0 10px 30px rgba(0,0,0,.25);
+    opacity:1;pointer-events:auto;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  /* hides + disables clicks once the footer scrolls into view, so it
+     stops sitting on top of the footer links underneath it */
+  .floating-cta.cta-hide{
+    opacity:0;transform:translateY(12px);pointer-events:none;
   }
 
   /* reveal animation */
@@ -786,8 +781,7 @@
 <body>
 <script>document.documentElement.classList.add('is-loading');</script>
 
-<canvas id="dotField"></canvas>
-<div id="cursorDot"></div>
+<div id="dotField"></div>
 
 <div id="pageLoader">
   <div class="loader-mark">
@@ -1203,44 +1197,6 @@
 
   </main>
 
-<footer id="siteFooter">
-  <div class="footer-card">
-    <div class="footer-top">
-      <div class="footer-logo">
-        <img src="Pl logo.png" alt="Pixelorylab">
-      </div>
-      <div class="footer-tagline">For ambitious products.<br>Told better.</div>
-    </div>
-
-    <div class="footer-cols">
-      <div class="footer-col">
-        <div class="footer-desc">Product storytelling for SaaS, AI &amp; tech.</div>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-label">Sections</div>
-        <a href="#work">Work</a>
-        <a href="#offers">Offers</a>
-        <a href="#portfolio" id="footerPortfolioLink">Portfolio</a>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-label">Get in touch</div>
-        <a href="https://x.com/Pixelorylab" target="_blank" rel="noopener">X / Twitter</a>
-        <a href="https://www.instagram.com/pixelorylab/" target="_blank" rel="noopener">Instagram</a>
-        <a href="https://calendly.com/pixelorylab/30min" target="_blank" rel="noopener">Book a call</a>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <div>© Pixelorylab 2026 — All rights reserved.</div>
-      <div class="footer-bottom-links">
-        <a href="mailto:pixelorylab@gmail.com">Email</a>
-        <a href="https://www.instagram.com/pixelorylab/" target="_blank" rel="noopener">Instagram</a>
-        <a href="#top" id="footerBackTop">Back to top ↑</a>
-      </div>
-    </div>
-  </div>
-</footer>
-
 <!-- PORTFOLIO PAGE -->
 <section id="portfolioView" class="portfolio-view">
   <div class="wrap portfolio-wrap">
@@ -1294,10 +1250,48 @@
 
     <div class="portfolio-cta">
       <h2>Have something worth launching?</h2>
-      <a href="https://tally.so/r/RGrypl" target="_blank" rel="noopener" class="btn">Get in touch</a>
+      <a href="#book" id="portfolioGetInTouch" class="btn">Get in touch</a>
     </div>
   </div>
 </section>
+
+<footer id="siteFooter">
+  <div class="footer-card">
+    <div class="footer-top">
+      <div class="footer-logo">
+        <img src="Pl logo.png" alt="Pixelorylab">
+      </div>
+      <div class="footer-tagline">For ambitious products.<br>Told better.</div>
+    </div>
+
+    <div class="footer-cols">
+      <div class="footer-col">
+        <div class="footer-desc">Product storytelling for SaaS, AI &amp; tech.</div>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-label">Sections</div>
+        <a href="#work" id="footerWorkLink">Work</a>
+        <a href="#offers" id="footerOffersLink">Offers</a>
+        <a href="#portfolio" id="footerPortfolioLink">Portfolio</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-label">Get in touch</div>
+        <a href="https://x.com/Pixelorylab" target="_blank" rel="noopener">X / Twitter</a>
+        <a href="https://www.instagram.com/pixelorylab/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://calendly.com/pixelorylab/30min" target="_blank" rel="noopener">Book a call</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© Pixelorylab 2026 — All rights reserved.</div>
+      <div class="footer-bottom-links">
+        <a href="mailto:pixelorylab@gmail.com">Email</a>
+        <a href="https://www.instagram.com/pixelorylab/" target="_blank" rel="noopener">Instagram</a>
+        <a href="#top" id="footerBackTop">Back to top ↑</a>
+      </div>
+    </div>
+  </div>
+</footer>
 
 <a href="https://tally.so/r/RGrypl" target="_blank" rel="noopener" class="btn floating-cta" id="floatingCta">Start a project →</a>
 
@@ -1656,6 +1650,19 @@
   const mainEl = document.getElementById('top');
   const footerEl = document.getElementById('siteFooter');
   const floatingCta = document.getElementById('floatingCta');
+
+  // The floating CTA is fixed to the bottom-right corner, which is the same
+  // spot the footer's last row of links (Instagram / Back to top) ends up
+  // in once you scroll to the bottom — so it was sitting on top of them
+  // and eating their clicks. Fade/disable it whenever the footer is on screen.
+  if(footerEl && floatingCta){
+    const ctaFooterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        floatingCta.classList.toggle('cta-hide', entry.isIntersecting);
+      });
+    }, {threshold:0, rootMargin:'0px 0px -10% 0px'});
+    ctaFooterObserver.observe(footerEl);
+  }
   const portfolioView = document.getElementById('portfolioView');
   const navHome = document.getElementById('navHome');
   const navPortfolio = document.getElementById('navPortfolio');
@@ -1663,7 +1670,6 @@
   function showView(view){
     if(view === 'portfolio'){
       mainEl.style.display = 'none';
-      footerEl.style.display = 'none';
       floatingCta.style.display = 'none';
       portfolioView.classList.add('show');
       document.body.classList.add('portfolio-active');
@@ -1675,7 +1681,6 @@
       portfolioView.classList.remove('show');
       document.body.classList.remove('portfolio-active');
       mainEl.style.display = '';
-      footerEl.style.display = '';
       floatingCta.style.display = '';
       navHome.classList.add('active');
       navPortfolio.classList.remove('active');
@@ -1777,10 +1782,31 @@
     // Book a Call also always plays the full slide-up transition/reveal.
     navigateTo('home', 'book');
   });
+  const portfolioGetInTouch = document.getElementById('portfolioGetInTouch');
+  if(portfolioGetInTouch){
+    portfolioGetInTouch.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo('home', 'book');
+    });
+  }
   document.getElementById('footerBackTop').addEventListener('click', (e) => {
     e.preventDefault();
     navigateTo('home');
   });
+  const footerWorkLink = document.getElementById('footerWorkLink');
+  if(footerWorkLink){
+    footerWorkLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo('home', 'work');
+    });
+  }
+  const footerOffersLink = document.getElementById('footerOffersLink');
+  if(footerOffersLink){
+    footerOffersLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo('home', 'offers');
+    });
+  }
   const footerPortfolioLink = document.getElementById('footerPortfolioLink');
   if(footerPortfolioLink){
     footerPortfolioLink.addEventListener('click', (e) => {
@@ -1792,183 +1818,6 @@
   if(window.location.hash === '#portfolio'){
     showView('portfolio');
   }
-</script>
-
-<script>
-(function(){
-  var isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-  /* ---------- reactive dotted background ---------- */
-  var canvas = document.getElementById('dotField');
-  var ctx = canvas.getContext('2d');
-  var DPR = Math.min(window.devicePixelRatio || 1, 2);
-  var SPACING = 14;              // px between dots
-  var BASE_R = 1.15;             // resting dot radius
-  var MAX_R = 1.9;               // dot radius right under the cursor
-  var INFLUENCE = 90;            // px radius of reactive zone
-  var PUSH = 3;                  // max px a dot shifts away from the cursor
-  var cw = 0, ch = 0;            // css px
-  var baseImg = null;            // cached static pattern
-  var lastBox = null;            // last redrawn reactive rect, for clearing
-
-  function resize(){
-    cw = window.innerWidth;
-    ch = window.innerHeight;
-    canvas.width = Math.round(cw * DPR);
-    canvas.height = Math.round(ch * DPR);
-    canvas.style.width = cw + 'px';
-    canvas.style.height = ch + 'px';
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    drawBase();
-  }
-
-  function drawBase(){
-    ctx.clearRect(0, 0, cw, ch);
-    ctx.fillStyle = 'rgba(0,0,0,.06)';
-    for(var y = 0; y <= ch + SPACING; y += SPACING){
-      for(var x = 0; x <= cw + SPACING; x += SPACING){
-        ctx.beginPath();
-        ctx.arc(x, y, BASE_R, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-    baseImg = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    lastBox = null;
-  }
-
-  function restoreBox(box){
-    if(!baseImg || !box) return;
-    var sx = Math.max(0, Math.round(box.x * DPR));
-    var sy = Math.max(0, Math.round(box.y * DPR));
-    var sw = Math.min(canvas.width - sx, Math.round(box.w * DPR));
-    var sh = Math.min(canvas.height - sy, Math.round(box.h * DPR));
-    if(sw <= 0 || sh <= 0) return;
-    ctx.putImageData(baseImg, 0, 0, sx, sy, sw, sh);
-  }
-
-  function drawReactive(px, py){
-    var pad = INFLUENCE + PUSH + MAX_R + 2;
-    var box = {
-      x: px - pad, y: py - pad,
-      w: pad * 2, h: pad * 2
-    };
-    restoreBox(lastBox);
-    restoreBox(box);
-    lastBox = box;
-
-    var startX = Math.floor((box.x) / SPACING) * SPACING;
-    var startY = Math.floor((box.y) / SPACING) * SPACING;
-    ctx.fillStyle = 'rgba(11,11,12,1)';
-    for(var y = startY; y <= box.y + box.h; y += SPACING){
-      if(y < 0 || y > ch) continue;
-      for(var x = startX; x <= box.x + box.w; x += SPACING){
-        if(x < 0 || x > cw) continue;
-        var dx = x - px, dy = y - py;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        if(dist >= INFLUENCE) continue;
-        var t = 1 - dist / INFLUENCE;         // 0..1, stronger near cursor
-        var ease = t * t * (3 - 2 * t);        // smoothstep
-        var r = BASE_R + (MAX_R - BASE_R) * ease;
-        var push = ease * PUSH;
-        var ang = Math.atan2(dy, dx);
-        var dxOff = dist > 0.01 ? Math.cos(ang) * push : 0;
-        var dyOff = dist > 0.01 ? Math.sin(ang) * push : 0;
-        ctx.globalAlpha = 0.06 + 0.16 * ease;
-        ctx.beginPath();
-        ctx.arc(x + dxOff, y + dyOff, r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  var pointerX = -9999, pointerY = -9999;
-  var lastPointerX = pointerX, lastPointerY = pointerY;
-  var rafPending = false;
-
-  function tick(){
-    rafPending = false;
-    if(pointerX !== lastPointerX || pointerY !== lastPointerY){
-      lastPointerX = pointerX;
-      lastPointerY = pointerY;
-      if(pointerY > -1000){
-        drawReactive(pointerX, pointerY);
-      } else if(lastBox){
-        restoreBox(lastBox);
-        lastBox = null;
-      }
-    }
-  }
-
-  function requestTick(){
-    if(!rafPending){
-      rafPending = true;
-      requestAnimationFrame(tick);
-    }
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-
-  if(isFinePointer){
-    window.addEventListener('mousemove', function(e){
-      pointerX = e.clientX;
-      pointerY = e.clientY;
-      requestTick();
-    }, {passive:true});
-    window.addEventListener('mouseleave', function(){
-      pointerY = -9999;
-      requestTick();
-    });
-  }
-
-  /* ---------- custom cursor ---------- */
-  if(isFinePointer){
-    document.body.classList.add('custom-cursor-on');
-    var dot = document.getElementById('cursorDot');
-    var dotX = window.innerWidth / 2, dotY = window.innerHeight / 2;
-    var targetX = dotX, targetY = dotY;
-    var hasMoved = false;
-
-    document.addEventListener('mousemove', function(e){
-      targetX = e.clientX;
-      targetY = e.clientY;
-      if(!hasMoved){
-        hasMoved = true;
-        document.body.classList.remove('cursor-hidden');
-      }
-    }, {passive:true});
-
-    document.addEventListener('mouseleave', function(){
-      document.body.classList.add('cursor-hidden');
-    });
-    document.addEventListener('mouseenter', function(){
-      if(hasMoved) document.body.classList.remove('cursor-hidden');
-    });
-
-    var HOVER_SELECTOR = 'a, button, input, textarea, select, [role="button"], .btn, .nav-icon, .nav-cta, .offer-link, .link-arrow, .proj-mute, .faq-q';
-    document.addEventListener('mouseover', function(e){
-      if(e.target.closest && e.target.closest(HOVER_SELECTOR)){
-        document.body.classList.add('cursor-hover');
-      }
-    });
-    document.addEventListener('mouseout', function(e){
-      if(e.target.closest && e.target.closest(HOVER_SELECTOR)){
-        document.body.classList.remove('cursor-hover');
-      }
-    });
-
-    function raf(){
-      dotX += (targetX - dotX) * 0.55;
-      dotY += (targetY - dotY) * 0.55;
-      dot.style.left = dotX + 'px';
-      dot.style.top = dotY + 'px';
-      requestAnimationFrame(raf);
-    }
-    document.body.classList.add('cursor-hidden');
-    requestAnimationFrame(raf);
-  }
-})();
 </script>
 
 </body>
