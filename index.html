@@ -141,15 +141,23 @@
     font-size:13px;font-weight:600;
     transition:max-width .25s ease,opacity .2s ease,margin .25s ease;
   }
-  .nav-icon:hover{
-    background:var(--gray-100);color:var(--ink);
-    padding:0 14px 0 12px;
-  }
-  .nav-icon:hover .nav-label{
-    max-width:100px;opacity:1;margin-left:8px;
-  }
   .nav-icon.active{
     background:var(--gray-100);color:var(--ink);
+  }
+
+  /* the label-expand-on-hover effect below is desktop-only on purpose.
+     On touch devices there's no real "hover" — a tap simulates it, and
+     with nothing to trigger hover-out it gets stuck expanded until the
+     user taps elsewhere. That stuck-wide icon is also what was shoving
+     "Book a Call" off the nav on mobile, since the row has no wrap. */
+  @media (hover:hover) and (pointer:fine){
+    .nav-icon:hover{
+      background:var(--gray-100);color:var(--ink);
+      padding:0 14px 0 12px;
+    }
+    .nav-icon:hover .nav-label{
+      max-width:100px;opacity:1;margin-left:8px;
+    }
   }
 
   .nav-cta{
