@@ -1482,8 +1482,7 @@
     } else {
       setMuteState(true);
 
-      ctrlBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
+      function toggleMute() {
         const goingUnmuted = video.muted;
         if (goingUnmuted) {
           // unmuting this one — mute every other tile so audio doesn't overlap
@@ -1493,7 +1492,18 @@
         }
         setMuteState(!goingUnmuted);
         if (video.paused) attemptPlay();
+      }
+
+      ctrlBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMute();
       });
+
+      // the whole tile is tappable too, not just the corner pill —
+      // e.stopPropagation() on the button above keeps a button click
+      // from double-firing this.
+      tile.style.cursor = 'pointer';
+      tile.addEventListener('click', toggleMute);
     }
 
     // pause once the tile scrolls out of view; playpause tiles stay
