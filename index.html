@@ -2086,7 +2086,14 @@
 
     const decode = imgs.map(img => img.decode ? img.decode().catch(() => {}) : Promise.resolve());
     Promise.all(decode).then(build);
+
+    // Mobile browsers fire 'resize' when the address bar shows/hides on scroll,
+    // even though the width hasn't changed. Only rebuild on genuine width changes
+    // so the track isn't torn down and repainted mid-scroll on mobile.
+    let lastWidth = window.innerWidth;
     window.addEventListener('resize', () => {
+      if(window.innerWidth === lastWidth) return;
+      lastWidth = window.innerWidth;
       clearTimeout(window.__clientsMarqueeResizeT);
       window.__clientsMarqueeResizeT = setTimeout(build, 200);
     });
