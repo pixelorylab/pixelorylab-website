@@ -2,6 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+  // Set theme before first paint to avoid a light-mode flash.
+  (function(){
+    try{
+      var saved = localStorage.getItem('pl-theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    }catch(e){}
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pixelorylab — Motion Studio</title>
 <link rel="icon" type="image/png" href="favicon.png">
@@ -25,6 +35,26 @@
     --radius-full:999px;
     --maxw:1440px;
     --pad:40px;
+  }
+  html[data-theme="dark"]{
+    --ink:#f2f1ee;
+    --gray-700:#b7b6b2;
+    --gray-500:#97968f;
+    --gray-300:#3a3937;
+    --gray-100:#201f1d;
+    --line:#2a2927;
+    --paper:#171614;
+    --paper-2:#1c1b19;
+  }
+  html[data-theme="dark"] body{
+    background-color:#0b0b0a;
+    background-image:
+      radial-gradient(1200px 600px at 15% 0%, rgba(255,255,255,.05) 0%, transparent 60%),
+      linear-gradient(180deg,#121110 0%, #0b0b0a 100%);
+  }
+  html[data-theme="dark"] body.portfolio-active{
+    background-color:#0b0b0a;
+    background-image:none;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   html{scroll-behavior:smooth;}
@@ -62,6 +92,10 @@
     background-image:radial-gradient(rgba(0,0,0,.06) 1.15px, transparent 1.15px);
     background-size:14px 14px;
     background-position:0 0;
+    transition:background-image .2s ease;
+  }
+  html[data-theme="dark"] #dotField{
+    background-image:radial-gradient(rgba(255,255,255,.06) 1.15px, transparent 1.15px);
   }
 
   a{color:inherit;text-decoration:none;}
@@ -80,6 +114,11 @@
     transition:transform .9s cubic-bezier(.76,0,.24,1);
     will-change:transform;
   }
+  html[data-theme="dark"] #pageLoader{
+    background:
+      radial-gradient(1200px 600px at 15% 0%, rgba(255,255,255,.05) 0%, transparent 60%),
+      linear-gradient(180deg,#121110 0%, #0b0b0a 100%);
+  }
   #pageLoader.loader-hide{transform:translateY(-100%);}
   #pageLoader.loader-below{transform:translateY(100%);}
   #pageLoader.no-anim{transition:none !important;}
@@ -91,12 +130,15 @@
     animation-delay:.15s;
   }
   .loader-mark img{width:100%;height:100%;object-fit:contain;}
+  .loader-mark .logo-dark{display:none;}
+  html[data-theme="dark"] .loader-mark .logo-light{display:none;}
+  html[data-theme="dark"] .loader-mark .logo-dark{display:block;}
   @keyframes loader-logo-in{
     to{opacity:1;transform:scale(1);}
   }
 
   /* ===== NAV ===== */
-  .nav-outer{position:sticky;top:0;z-index:100;padding:20px var(--pad) 0;}
+  .nav-outer{position:sticky;top:0;z-index:250;padding:20px var(--pad) 0;}
   .nav{
     max-width:fit-content;
     margin:0 auto;
@@ -105,47 +147,91 @@
     display:flex;align-items:center;gap:8px;
     padding:8px 8px 8px 10px;
     box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
-    transition:box-shadow .3s ease, transform .3s ease;
+    transition:box-shadow .3s ease, transform .3s ease, background .2s ease, border-color .2s ease;
+    border:1px solid transparent;
   }
   .nav.scrolled{box-shadow:0 2px 6px rgba(0,0,0,.06), 0 16px 40px rgba(0,0,0,.08);}
+  html[data-theme="dark"] .nav{
+    background:#18171a;
+    border-color:rgba(255,255,255,.07);
+    box-shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+  html[data-theme="dark"] .nav.scrolled{box-shadow:0 2px 6px rgba(0,0,0,.35), 0 16px 40px rgba(0,0,0,.45);}
+
+  /* ===== THEME TOGGLE ===== */
+  .theme-toggle{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:38px;height:38px;flex-shrink:0;
+    border-radius:50%;border:none;cursor:pointer;
+    background:var(--gray-100);color:var(--ink);
+    transition:background .25s ease,color .25s ease,transform .2s ease;
+  }
+  .theme-toggle:hover{transform:scale(1.05);}
+  .theme-toggle svg{width:17px;height:17px;stroke:currentColor;flex-shrink:0;}
+  .theme-toggle .theme-icon-moon{display:none;}
+  html[data-theme="dark"] .theme-toggle .theme-icon-sun{display:none;}
+  html[data-theme="dark"] .theme-toggle .theme-icon-moon{display:block;}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em;font-size:15px;}
   .mark{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;background:transparent;}
   .mark img{width:100%;height:100%;object-fit:cover;}
+  .mark .logo-dark{display:none;}
+  html[data-theme="dark"] .mark .logo-light{display:none;}
+  html[data-theme="dark"] .mark .logo-dark{display:block;}
   .mark svg{width:16px;height:16px;}
+  /* ===== mobile-only brand name next to the logo mark ===== */
+  .brand-name{
+    display:none;
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',sans-serif;
+    font-weight:600;font-size:15px;letter-spacing:-.01em;
+    color:var(--ink);white-space:nowrap;
+  }
 
-  .nav-links{display:flex;align-items:center;gap:4px;}
+  .nav-links{
+    display:flex;align-items:center;gap:4px;overflow:hidden;
+    max-width:var(--nav-links-natural-width, 600px);opacity:1;
+    /* EXPAND (this rule is the "target" state when .scrolled is removed):
+       a touch slower than the collapse, with opacity starting a beat after
+       the width does, so the labels don't pop to full brightness while the
+       pill is still visibly growing — they ease in alongside it instead. */
+    transition:max-width .7s cubic-bezier(.22,1,.36,1),opacity .5s cubic-bezier(.22,1,.36,1) .12s,margin .7s cubic-bezier(.22,1,.36,1);
+    will-change:max-width,opacity;
+  }
   .nav-icon{
     display:inline-flex;align-items:center;
     height:38px;border-radius:var(--radius-full);
-    padding:0 11px;
+    padding:0 14px;
     color:var(--gray-500);
     background:transparent;
-    transition:background .25s ease,color .25s ease,padding .25s ease;
+    white-space:nowrap;
+    transition:background .25s ease,color .25s ease;
   }
-  .nav-icon svg{width:17px;height:17px;stroke:currentColor;flex-shrink:0;}
+  .nav-icon svg{display:none;}
   .nav-icon .nav-label{
-    max-width:0;opacity:0;overflow:hidden;white-space:nowrap;
     font-size:13px;font-weight:600;
-    transition:max-width .25s ease,opacity .2s ease,margin .25s ease;
   }
   .nav-icon.active{
     background:var(--gray-100);color:var(--ink);
   }
-
-  /* the label-expand-on-hover effect below is desktop-only on purpose.
-     On touch devices there's no real "hover" — a tap simulates it, and
-     with nothing to trigger hover-out it gets stuck expanded until the
-     user taps elsewhere. That stuck-wide icon is also what was shoving
-     "Book a Call" off the nav on mobile, since the row has no wrap. */
   @media (hover:hover) and (pointer:fine){
     .nav-icon:hover{
       background:var(--gray-100);color:var(--ink);
-      padding:0 14px 0 12px;
-    }
-    .nav-icon:hover .nav-label{
-      max-width:100px;opacity:1;margin-left:8px;
     }
   }
+
+  /* ===== shrink nav to logo + Book a Call once the page is scrolled ===== */
+  .nav.scrolled .nav-links{
+    max-width:0;opacity:0;margin:0;pointer-events:none;
+    /* COLLAPSE (target state when .scrolled is added) — back to the
+       original single-curve timing, shared by width/opacity/margin. */
+    transition:max-width .6s cubic-bezier(.16,1,.3,1),opacity .45s cubic-bezier(.16,1,.3,1),margin .6s cubic-bezier(.16,1,.3,1);
+  }
+  .theme-toggle{
+    overflow:hidden;
+    transition:background .25s ease,color .25s ease,transform .2s ease;
+  }
+  /* NOTE: the theme toggle intentionally stays visible when the nav is
+     scrolled/shrunk — only .nav-links collapses. So the shrunk nav shows
+     logo + toggle + Book a Call, not just logo + Book a Call. */
 
   .nav-cta{
     background:var(--ink);color:#fff;
@@ -154,13 +240,84 @@
     transition:transform .2s ease,background .2s ease;
   }
   .nav-cta:hover{transform:translateY(-1px);background:#222;}
+  html[data-theme="dark"] .nav-cta{background:#f2f1ee;color:#0b0b0c;}
+  html[data-theme="dark"] .nav-cta:hover{background:#ffffff;}
+
+  /* ===== HAMBURGER (mobile-only trigger for the dropdown menu below) ===== */
+  .nav-hamburger{
+    display:none;
+    flex-direction:column;
+    align-items:center;justify-content:center;
+    width:38px;height:38px;flex-shrink:0;
+    border-radius:50%;border:none;cursor:pointer;
+    background:var(--gray-100);color:var(--ink);
+    transition:background .25s ease,transform .2s ease;
+  }
+  .nav-hamburger:hover{transform:scale(1.05);}
+  .nav-hamburger .bar{
+    display:block;width:16px;height:1.6px;border-radius:1px;
+    background:currentColor;
+    transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .2s ease;
+  }
+  .nav-hamburger .bar+.bar{margin-top:4px;}
+  /* morph into an X once the menu is open */
+  .nav-hamburger.active .bar:nth-child(1){transform:translateY(5.6px) rotate(45deg);}
+  .nav-hamburger.active .bar:nth-child(2){opacity:0;}
+  .nav-hamburger.active .bar:nth-child(3){transform:translateY(-5.6px) rotate(-45deg);}
+
+  /* ===== MOBILE DROPDOWN MENU ===== */
+  .mobile-menu-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.35);
+    opacity:0;pointer-events:none;transition:opacity .3s ease;
+    z-index:150;display:none;
+  }
+  .mobile-menu-backdrop.open{opacity:1;pointer-events:auto;}
+  .mobile-menu{
+    display:none;
+    position:fixed;left:0;right:0;top:0;
+    padding:0 var(--pad);
+    z-index:200;
+    transform:translateY(-10px);opacity:0;pointer-events:none;
+    transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .3s ease;
+  }
+  .mobile-menu.open{transform:translateY(0);opacity:1;pointer-events:auto;}
+  .mobile-menu-inner{
+    margin-top:70px;
+    background:#ffffff;border:1px solid transparent;
+    border-radius:var(--radius-lg);
+    box-shadow:0 2px 6px rgba(0,0,0,.06), 0 16px 40px rgba(0,0,0,.12);
+    padding:10px;
+  }
+  html[data-theme="dark"] .mobile-menu-inner{
+    background:#18171a;border-color:rgba(255,255,255,.07);
+    box-shadow:0 2px 6px rgba(0,0,0,.35), 0 16px 40px rgba(0,0,0,.45);
+  }
+  .mobile-menu-link{
+    display:block;text-align:center;
+    padding:15px 16px;border-radius:var(--radius-full);
+    font-size:15px;font-weight:600;color:var(--gray-700);
+    transition:background .2s ease,color .2s ease;
+  }
+  .mobile-menu-link+.mobile-menu-link{margin-top:2px;}
+  .mobile-menu-link.active{background:var(--gray-100);color:var(--ink);}
+  .mobile-menu-divider{height:1px;background:var(--line);margin:8px 6px;}
+  .mobile-menu-cta{
+    display:block;text-align:center;
+    margin:2px 2px 2px;
+    padding:15px 16px;border-radius:var(--radius-full);
+    background:var(--ink);color:#fff;
+    font-size:15px;font-weight:700;
+  }
+  html[data-theme="dark"] .mobile-menu-cta{background:#f2f1ee;color:#0b0b0c;}
 
   /* ===== PORTFOLIO PAGE ===== */
   .portfolio-view{
     display:none;
     background:#ffffff;color:var(--ink);
     padding:110px 0 0;
+    transition:background .2s ease;
   }
+  html[data-theme="dark"] .portfolio-view{background:#0b0b0a;}
   .portfolio-view.show{display:block;}
   .portfolio-wrap{padding:0 var(--pad) 20px;max-width:1738px;margin-top:-56px;}
   .portfolio-head{text-align:center;padding:0 0 48px 0;}
@@ -179,6 +336,7 @@
     margin-bottom:22px;overflow:hidden;
     box-shadow:0 0 0 1px var(--line) inset;
   }
+  html[data-theme="dark"] .cs-visual{background:var(--paper);}
   .cs-visual::after{
     content:"";
     position:absolute;inset:0;z-index:5;
@@ -212,6 +370,7 @@
      through to whatever is behind (here, the video). This invisible square
      hit-target fills those corners in so the entire button is clickable. */
   .cs-mute-btn::before{content:"";position:absolute;inset:0;border-radius:0;}
+  html[data-theme="dark"] .cs-mute-btn{color:#0b0b0c;}
   .cs-tile h3{font-size:19px;font-weight:700;margin-bottom:5px;}
   .cs-tile p{font-size:14px;color:var(--gray-500);line-height:1.4;}
   .portfolio-cta{text-align:center;padding:0 0 64px 0;}
@@ -233,41 +392,43 @@
   .process-head h2{font-size:48px;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-bottom:16px;}
   .process-head p{font-size:15px;color:var(--gray-700);line-height:1.6;max-width:440px;margin:0 auto;}
 
-  .process-timeline{position:relative;max-width:860px;margin:0 auto;padding-left:32px;}
-  .process-spine{
-    position:absolute;left:0;top:6px;bottom:6px;width:1px;
-    background:var(--line);
+  .process-carousel{position:relative;max-width:860px;margin:0 auto;}
+  /* Pure crossfade: only opacity ever animates, nothing ever transforms.
+     Each card is absolutely stacked at the same position and just fades
+     in/out over the other. This is the one transition that can't produce
+     corner artifacts on a rounded, overflow:hidden card — the browser
+     never has to recompute that clip mid-movement because nothing moves. */
+  .process-stage{position:relative;overflow:hidden;transition:height .45s cubic-bezier(.22,1,.36,1);}
+  .process-step{
+    position:absolute;top:0;left:0;width:100%;
+    opacity:0;pointer-events:none;
+    transition:opacity .5s ease;
   }
-  .process-spine-fill{
-    position:absolute;left:0;top:0;width:100%;height:0;
-    background:linear-gradient(180deg,#3b6bff,rgba(59,107,255,.15));
-    transition:height 1.5s cubic-bezier(.22,1,.36,1);
-  }
-  .process-timeline.in .process-spine-fill{height:100%;}
-
-  .process-step{position:relative;padding-bottom:22px;}
-  .process-step:last-child{padding-bottom:0;}
+  .process-step.active{opacity:1;pointer-events:auto;position:relative;}
 
   .process-card{
     position:relative;
     background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius-lg);
-    padding:36px 34px 26px;overflow:hidden;
-    opacity:0;transform:translateY(18px);
-    transition:opacity .6s ease, transform .6s ease, border-color .25s ease, box-shadow .25s ease;
+    padding:26px 34px 30px;overflow:hidden;
+    transition:border-color .25s ease, box-shadow .25s ease;
   }
-  .process-step.in .process-card{opacity:1;transform:translateY(0);}
   .process-card:hover{border-color:var(--gray-300);box-shadow:0 14px 32px rgba(0,0,0,.05);}
 
   .process-ghost{
-    position:absolute;top:22px;right:30px;
-    font-size:56px;font-weight:800;letter-spacing:-.02em;
+    display:block;
+    font-size:44px;font-weight:800;letter-spacing:-.02em;
     color:var(--gray-100);line-height:1;pointer-events:none;
-    font-family:'Inter',sans-serif;
+    font-family:'Inter',sans-serif;margin-bottom:6px;
   }
+  /* In dark mode --gray-100 sits almost exactly on top of --paper-2 (the
+     card background), so the watermark number disappears entirely. Give it
+     its own, slightly lighter tone in dark mode so it stays a faint but
+     legible watermark instead of vanishing. */
+  html[data-theme="dark"] .process-ghost{color:rgba(255,255,255,.07);}
   .process-tag{
     font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
     font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-    color:#3b6bff;margin-bottom:20px;position:relative;
+    color:#3b6bff;margin-bottom:16px;position:relative;
   }
   .process-card h3{font-size:26px;font-weight:700;letter-spacing:-.01em;margin-bottom:12px;position:relative;}
   .process-card p{font-size:14.5px;color:var(--gray-700);line-height:1.65;position:relative;max-width:560px;}
@@ -289,11 +450,29 @@
     font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;
   }
 
+  .process-nav{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:32px;}
+  .process-arrow{
+    width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--paper);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    transition:border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+  }
+  .process-arrow svg{width:18px;height:18px;stroke:var(--ink);}
+  .process-arrow:hover{border-color:var(--gray-300);box-shadow:0 6px 18px rgba(0,0,0,.06);}
+  .process-arrow:active{transform:scale(.94);}
+  .process-arrow:disabled{opacity:.35;cursor:default;box-shadow:none;transform:none;}
+
+  .process-indicators{display:flex;align-items:center;gap:8px;}
+  .process-indicators button{
+    width:8px;height:8px;border-radius:50%;border:none;padding:0;background:var(--gray-300);
+    cursor:pointer;transition:width .3s ease, border-radius .3s ease, background .3s ease;
+  }
+  .process-indicators button.active{width:26px;border-radius:5px;background:#3b6bff;}
+
   @media (max-width:860px){
     .process-head h2{font-size:32px;}
-    .process-card{padding:28px 22px 22px;}
+    .process-card{padding:22px 22px 24px;}
     .process-card h3{font-size:22px;}
-    .process-ghost{font-size:42px;top:18px;right:20px;}
+    .process-ghost{font-size:36px;}
     .process-meta{flex-direction:column;gap:14px;}
     .process-meta-item{
       min-width:0;max-width:100%;
@@ -361,6 +540,23 @@
     box-shadow:0 24px 40px -16px rgba(0,0,0,0.3);
     animation:float-chip 6.5s ease-in-out infinite;
   }
+  html[data-theme="dark"] .hero-graphic .shape-cube{
+    background:linear-gradient(135deg,#3a3a3d,#222224 60%,#141416);
+    border-color:#2c2c2f;
+    box-shadow:0 44px 80px -24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  html[data-theme="dark"] .hero-graphic .shape-cube:before{
+    background:linear-gradient(135deg,#313133,#1a1a1c);
+  }
+  html[data-theme="dark"] .hero-graphic .shape-disc{
+    background:linear-gradient(135deg,#333336,#161618);
+    border-color:#2c2c2f;
+    box-shadow:0 32px 56px -20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  html[data-theme="dark"] .hero-graphic .shape-chip{
+    background:#ffffff;
+    box-shadow:0 24px 40px -16px rgba(0,0,0,0.4);
+  }
   @keyframes float-cube{
     0%,100%{transform:translateY(0) rotate(12deg);}
     50%{transform:translateY(-16px) rotate(16deg);}
@@ -395,6 +591,11 @@
   .btn:hover{transform:translateY(-2px);background:#222;}
   .btn.light{background:#fff;color:var(--ink);}
   .btn.light:hover{background:#f0f0f0;}
+  html[data-theme="dark"] .btn:not(.light){background:#f2f1ee;color:#0b0b0c;}
+  html[data-theme="dark"] .btn:not(.light):hover{background:#ffffff;}
+  /* .btn.light always sits on the permanently-dark CTA panel, so its
+     white-pill/dark-text look must stay fixed regardless of site theme */
+  html[data-theme="dark"] .btn.light{color:#0b0b0c;}
   .link-arrow{font-size:14px;font-weight:600;color:var(--gray-700);display:inline-flex;align-items:center;gap:8px;}
   .link-arrow:hover{color:var(--ink);}
   .hr{border:none;border-top:1px solid var(--line);margin-top:105px;}
@@ -420,12 +621,19 @@
   }
   .mute-pill{
     position:absolute;bottom:22px;right:22px;z-index:2;
-    background:rgba(255,255,255,.12);backdrop-filter:blur(6px);
+    background:rgba(10,10,14,.6);backdrop-filter:blur(6px);
     color:#fff;border:1px solid rgba(255,255,255,.25);
     border-radius:var(--radius-full);padding:9px 16px;font-size:12px;
     display:flex;align-items:center;gap:6px;cursor:pointer;
     font-family:inherit;
+    box-shadow:0 6px 18px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.22);
+    transition:box-shadow .2s ease, transform .2s ease, background .2s ease;
   }
+  .mute-pill:hover{
+    box-shadow:0 8px 22px rgba(0,0,0,.34), 0 3px 8px rgba(0,0,0,.26);
+  }
+  .video-panel{cursor:pointer;}
+  .video-panel .mute-pill{cursor:pointer;}
   .float-tooltip{
     position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
     background:linear-gradient(90deg,#8b5cf6,#f59e0b);
@@ -462,6 +670,9 @@
   }
   .clients-track img:hover{opacity:1;filter:grayscale(0%);}
   .clients-track img[alt="Flowerpot"]{height:106px;}
+  .clients-track img[alt="Frontier"],
+  .clients-track img[alt="Liisto"],
+  .clients-track img[alt="Oak Park"]{height:180px;}
   @keyframes clients-scroll{
     from{transform:translateX(0);}
     to{transform:translateX(-50%);}
@@ -472,8 +683,11 @@
   @media(max-width:700px){
     .clients-section{padding:40px 0 48px;}
     .clients-track{gap:60px;}
-    .clients-track img{height:88px;}
-    .clients-track img[alt="Flowerpot"]{height:68px;}
+    .clients-track img{height:120px;}
+    .clients-track img[alt="Flowerpot"]{height:92px;}
+    .clients-track img[alt="Frontier"],
+    .clients-track img[alt="Liisto"],
+    .clients-track img[alt="Oak Park"]{height:158px;}
   }
 
   /* ===== VALUE SECTION ===== */
@@ -529,6 +743,7 @@
   }
   .proj-mute:hover{transform:scale(1.05);}
   .proj-mute::before{content:"";position:absolute;inset:0;border-radius:0;}
+  html[data-theme="dark"] .proj-mute{color:#0b0b0c;}
   .proj-meta{margin-top:22px;}
   .proj-meta h3{font-size:26px;font-weight:800;}
   .proj-cat{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-500);margin:10px 0 4px;}
@@ -548,6 +763,7 @@
     background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;
     font-size:11px;font-weight:700;
   }
+  html[data-theme="dark"] .collage-ball.center{background:#f2f1ee;color:#0b0b0c;}
 
   @media(max-width:900px){
     .proj-grid{grid-template-columns:1fr;}
@@ -586,8 +802,23 @@
     .svc-head{flex-direction:column;gap:14px;}
   }
 
+  @media(max-width:700px){
+    /* manual swipe instead of stacked rows on mobile */
+    .svc-scroll{
+      overflow-x:auto;-webkit-overflow-scrolling:touch;
+      scroll-snap-type:x mandatory;
+      scrollbar-width:none;-ms-overflow-style:none;
+    }
+    .svc-scroll::-webkit-scrollbar{display:none;}
+    .svc-track{display:flex;gap:16px;}
+    .svc-row{
+      width:82%;max-width:320px;flex-shrink:0;margin-bottom:0;
+      scroll-snap-align:center;
+    }
+  }
+
   /* ===== OFFERS ===== */
-  #offers{padding:0 0 130px;scroll-margin-top:110px;}
+  #testimonials{padding:0 0 130px;scroll-margin-top:110px;}
   .offers-head{max-width:640px;margin:0 auto 60px;text-align:center;}
   .offers-eyebrow{display:flex;align-items:center;justify-content:center;gap:14px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gray-500);margin-bottom:22px;}
   .offers-eyebrow span{width:26px;height:1px;background:var(--line);display:inline-block;}
@@ -650,6 +881,7 @@
   .offer-link:hover span{transform:translate(2px,-2px);}
 
   .offer-card-featured{background:linear-gradient(160deg,#666666 0%,#4d4d4d 20%,#333333 40%,#1a1a1a 60%,#0d0d0d 80%,#000000 100%);border-color:transparent;color:#fff;}
+  html[data-theme="dark"] .offer-card-featured{border:1px solid rgba(255,255,255,.14);}
   .offer-card-featured .offer-tag{color:rgba(255,255,255,.55);}
   .offer-card-featured h3{color:#fff;}
   .offer-card-featured .offer-desc{color:rgba(255,255,255,.72);}
@@ -662,6 +894,53 @@
   @media(max-width:900px){
     .offers-grid{grid-template-columns:1fr;}
     .offers-head h2{font-size:38px;}
+  }
+
+  /* ===== TESTIMONIALS (marquee, same pattern as "Our clients") ===== */
+  .testi-marquee{
+    position:relative;width:100%;overflow:hidden;
+    mask-image:linear-gradient(90deg, transparent 0%, transparent 14%, #000 22%, #000 78%, transparent 86%, transparent 100%);
+    -webkit-mask-image:linear-gradient(90deg, transparent 0%, transparent 14%, #000 22%, #000 78%, transparent 86%, transparent 100%);
+  }
+  .testi-track{
+    display:flex;align-items:stretch;gap:22px;width:max-content;
+    animation:testi-scroll 55s linear infinite;
+  }
+  .testi-marquee:hover .testi-track{animation-play-state:paused;}
+  .testi-card{
+    background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius-lg);
+    padding:32px 28px;display:flex;flex-direction:column;position:relative;
+    width:360px;flex-shrink:0;
+  }
+  .testi-quote{font-size:14.5px;color:var(--gray-700);line-height:1.6;margin-bottom:28px;flex:1;}
+  .testi-person{display:flex;align-items:center;gap:12px;margin-top:auto;}
+  .testi-avatar{width:38px;height:38px;border-radius:50%;background:var(--gray-100);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;overflow:hidden;}
+  .testi-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+  .testi-name{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.3;}
+  .testi-role{font-size:12px;color:var(--gray-500);line-height:1.3;}
+
+  @keyframes testi-scroll{
+    from{transform:translateX(0);}
+    to{transform:translateX(-50%);}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .testi-track{animation:none !important;}
+  }
+  @media(max-width:900px){
+    .testi-card{width:300px;padding:26px 22px;}
+  }
+  @media(max-width:700px){
+    /* manual swipe instead of the auto-scrolling marquee on mobile */
+    .testi-marquee{
+      overflow-x:auto;-webkit-overflow-scrolling:touch;
+      scroll-snap-type:x mandatory;
+      mask-image:none;-webkit-mask-image:none;
+      padding:0 var(--pad);
+      scrollbar-width:none;-ms-overflow-style:none;
+    }
+    .testi-marquee::-webkit-scrollbar{display:none;}
+    .testi-track{gap:16px;animation:none !important;}
+    .testi-card{width:270px;padding:22px 20px;scroll-snap-align:center;}
   }
 
   /* ===== CTA ===== */
@@ -799,13 +1078,23 @@
   @media(max-width:640px){
     :root{--pad:20px;}
 
-    /* --- nav: the icon row + CTA no longer fit their desktop widths on a phone --- */
+    /* --- nav: the text label row + CTA no longer fit their desktop widths on a phone,
+       so let the labels scroll horizontally instead of wrapping or overflowing --- */
     .nav-outer{padding:14px var(--pad) 0;}
     .nav{width:100%;max-width:100%;padding:6px 6px 6px 8px;gap:6px;justify-content:space-between;}
-    .nav-links{gap:0;}
-    .nav-icon{padding:0 8px;height:36px;}
-    .nav-icon svg{width:16px;height:16px;}
-    .nav-cta{padding:9px 14px;font-size:12.5px;white-space:nowrap;}
+    /* --- nav-links/CTA no longer show inline on phones — the hamburger
+       opens them in the dropdown menu instead, so the pill is just
+       logo, brand name, 3-line menu button, mode toggle --- */
+    .nav-links{display:none;}
+    .brand-name{display:inline-flex;margin-right:auto;padding-right:16px;}
+    .nav.scrolled .nav-links{max-width:0;}
+    .nav-cta{display:none;}
+    .nav-hamburger{display:inline-flex;width:32px;height:32px;}
+    .theme-toggle{width:32px;height:32px;margin-left:3px;}
+    .theme-toggle svg{width:15px;height:15px;}
+    .mobile-menu-backdrop{display:block;}
+    .mobile-menu{display:block;}
+    .mobile-menu-inner{margin-top:58px;}
 
     /* --- vertical rhythm: 110px section padding is desktop-scaled --- */
     section{padding:64px 0;}
@@ -813,7 +1102,7 @@
     #services{padding-top:8px;padding-bottom:36px;}
     #work{padding-top:20px;padding-bottom:32px;}
     #process{padding:8px 0 56px;}
-    #offers{padding:0 0 72px;}
+    #testimonials{padding:0 0 72px;}
     #faq{padding:0 0 72px;}
     .hr{margin-top:56px;}
     .feature-head{margin-top:64px;}
@@ -846,6 +1135,12 @@
     background:#fff;border-radius:var(--radius-lg);
     box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
     padding:40px;
+    transition:background .2s ease, box-shadow .2s ease;
+  }
+  html[data-theme="dark"] .contact-card{
+    background:var(--paper-2);
+    box-shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
+    border:1px solid var(--line);
   }
   .contact-row{display:flex;gap:16px;margin-bottom:16px;}
   .contact-field{
@@ -859,7 +1154,18 @@
   }
   .contact-field::placeholder{color:var(--gray-500);}
   .contact-field:focus{outline:none;border-color:var(--gray-300);background:#fff;}
+  html[data-theme="dark"] .contact-field:focus{background:var(--paper);}
   textarea.contact-field{resize:vertical;min-height:140px;margin-bottom:20px;font-family:inherit;line-height:1.5;}
+  .booking-panel{
+    max-width:1100px;margin:0 auto;border-radius:var(--radius-lg);overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
+    background:#fff;padding-top:20px;
+    transition:background .2s ease, box-shadow .2s ease;
+  }
+  html[data-theme="dark"] .booking-panel{
+    background:var(--paper-2);
+    box-shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
+  }
   .contact-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
   .contact-hint{font-size:13px;color:var(--gray-500);}
   .contact-hint kbd{
@@ -901,43 +1207,57 @@
 
 <div id="pageLoader">
   <div class="loader-mark">
-    <img src="Pl logo.png" alt="Pixelorylab">
+    <img class="logo-light" src="Pl logo.png" alt="Pixelorylab">
+    <img class="logo-dark" src="white logo-Photoroom.png" alt="Pixelorylab">
   </div>
 </div>
 
 <div class="nav-outer">
   <nav class="nav" id="mainNav">
     <a href="#top" class="mark">
-      <img src="Pl logo.png" alt="Pixelorylab">
+      <img class="logo-light" src="Pl logo.png" alt="Pixelorylab">
+      <img class="logo-dark" src="white logo-Photoroom.png" alt="Pixelorylab">
     </a>
+    <span class="brand-name">Pixelorylab</span>
     <div class="nav-links">
       <a href="#top" class="nav-icon active" id="navHome" data-view="home">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
         <span class="nav-label">Home</span>
       </a>
       <a href="#portfolio" class="nav-icon" id="navPortfolio" data-view="portfolio">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         <span class="nav-label">Portfolio</span>
       </a>
       <a href="#process" class="nav-icon" id="navProcess" data-view="process">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20v-10M18 20v-3M9 8l3-5 3 5"/><circle cx="12" cy="4" r="1.4" fill="currentColor" stroke="none"/></svg>
         <span class="nav-label">Process</span>
       </a>
-      <a href="#offers" class="nav-icon" id="navOffers" data-view="offers">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L3 3v6.59a2 2 0 0 0 .59 1.41l9.59 9.59a2 2 0 0 0 2.82 0l6.59-6.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/></svg>
-        <span class="nav-label">Offers</span>
-      </a>
       <a href="#faq" class="nav-icon" id="navFaq" data-view="faq">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.8-2.2 2.1-2.4 3.6"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg>
         <span class="nav-label">FAQ</span>
       </a>
       <a href="#contact" class="nav-icon" id="navContact" data-view="contact">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 6.5 8 6 8-6"/></svg>
         <span class="nav-label">Contact</span>
       </a>
     </div>
+    <button type="button" class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
     <a href="#book" id="navBookCall" class="nav-cta">Book<span class="nav-cta-full"> a Call</span></a>
+    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+      <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
   </nav>
+</div>
+
+<div class="mobile-menu-backdrop" id="mobileMenuBackdrop"></div>
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+  <div class="mobile-menu-inner">
+    <a href="#top" class="mobile-menu-link active" id="mobileNavHome" data-view="home">Home</a>
+    <a href="#portfolio" class="mobile-menu-link" id="mobileNavPortfolio" data-view="portfolio">Portfolio</a>
+    <a href="#process" class="mobile-menu-link" id="mobileNavProcess" data-view="process">Process</a>
+    <a href="#faq" class="mobile-menu-link" id="mobileNavFaq" data-view="faq">FAQ</a>
+    <a href="#contact" class="mobile-menu-link" id="mobileNavContact" data-view="contact">Contact</a>
+    <div class="mobile-menu-divider"></div>
+    <a href="#book" class="mobile-menu-cta" id="mobileNavBookCall">Book a Call</a>
+  </div>
 </div>
 
 <main id="top">
@@ -971,7 +1291,7 @@
       </div>
 
       <div class="video-panel reveal load-reveal">
-        <video class="feature-video" src="liisto bts.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <video class="feature-video" src="launch.mp4" autoplay muted loop playsinline preload="auto"></video>
         <div class="glow"></div>
         <button class="mute-pill" type="button">Unmute film</button>
       </div>
@@ -987,9 +1307,9 @@
     <div class="clients-marquee">
       <div class="clients-track" id="clientsTrack">
         <img src="flowerpotred.png" alt="Flowerpot">
-        <img src="frontier logo.png" alt="Frontier">
+        <img src="frontier logo-Photoroom.png" alt="Frontier">
         <img src="liisto logo.png" alt="Liisto">
-        <img src="oak park nobg.png" alt="Oak Park">
+        <img src="oak park nobg-Photoroom.png" alt="Oak Park">
       </div>
     </div>
   </section>
@@ -1004,25 +1324,29 @@
         </div>
       </div>
 
-      <div class="svc-row reveal">
-        <div class="svc-num">01</div>
-        <h3>Launch Video</h3>
-        <p>A cinematic flagship video built to give your release clarity, confidence, and a real sense of occasion — the kind audiences actually remember.</p>
-        <div class="svc-best">Best for launches and<br>big updates</div>
-      </div>
+      <div class="svc-scroll">
+        <div class="svc-track">
+          <div class="svc-row reveal">
+            <div class="svc-num">01</div>
+            <h3>Launch Video</h3>
+            <p>A cinematic flagship video built to give your release clarity, confidence, and a real sense of occasion — the kind audiences actually remember.</p>
+            <div class="svc-best">Best for launches and<br>big updates</div>
+          </div>
 
-      <div class="svc-row reveal">
-        <div class="svc-num">02</div>
-        <h3>Product Demo</h3>
-        <p>A focused, visually sharp walkthrough that shows your product in motion — making the experience feel clear, useful, and effortless to follow.</p>
-        <div class="svc-best">Best for product pages<br>and sales</div>
-      </div>
+          <div class="svc-row reveal">
+            <div class="svc-num">02</div>
+            <h3>Product Demo</h3>
+            <p>A focused, visually sharp walkthrough that shows your product in motion — making the experience feel clear, useful, and effortless to follow.</p>
+            <div class="svc-best">Best for product pages<br>and sales</div>
+          </div>
 
-      <div class="svc-row reveal">
-        <div class="svc-num">03</div>
-        <h3>Explainer Video</h3>
-        <p>A clear visual story that turns complex features and ideas into moments that click instantly for any viewer.</p>
-        <div class="svc-best">Best for onboarding<br>and campaigns</div>
+          <div class="svc-row reveal">
+            <div class="svc-num">03</div>
+            <h3>Explainer Video</h3>
+            <p>A clear visual story that turns complex features and ideas into moments that click instantly for any viewer.</p>
+            <div class="svc-best">Best for onboarding<br>and campaigns</div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -1096,109 +1420,133 @@
         <p>Three phases, no agency theatre — just the work it takes to get your product its moment.</p>
       </div>
 
-      <div class="process-timeline" id="processTimeline">
-        <div class="process-spine"><div class="process-spine-fill"></div></div>
+      <div class="process-carousel" id="processCarousel">
+        <div class="process-stage" id="processStage">
 
-        <div class="process-step">
-          <div class="process-card">
-            <span class="process-ghost">01</span>
-            <div class="process-tag">Phase 01 / Discovery</div>
-            <h3>Understand the product</h3>
-            <p>We get into your product, your audience, and what this launch needs to do — then map the direction: tone, story, format, channels.</p>
-            <div class="process-meta">
-              <div class="process-meta-item">
-                <span class="m-label">Deliverable</span>
-                <span class="m-fill"></span>
-                <span class="m-value">Brief + creative direction</span>
+          <div class="process-step active" data-index="0">
+            <div class="process-card">
+              <span class="process-ghost">01</span>
+              <div class="process-tag">Phase 01 / Discovery</div>
+              <h3>Understand the product</h3>
+              <p>We get into your product, your audience, and what this launch needs to do — then map the direction: tone, story, format, channels.</p>
+              <div class="process-meta">
+                <div class="process-meta-item">
+                  <span class="m-label">Deliverable</span>
+                  <span class="m-fill"></span>
+                  <span class="m-value">Brief + creative direction</span>
+                </div>
               </div>
             </div>
           </div>
+
+          <div class="process-step" data-index="1">
+            <div class="process-card">
+              <span class="process-ghost">02</span>
+              <div class="process-tag">Phase 02 / Direction</div>
+              <h3>Script &amp; storyboard</h3>
+              <p>We write a tight, retentive script and storyboard it scene-by-scene, locking voice and music early — so nothing about the edit is a surprise later.</p>
+              <div class="process-meta">
+                <div class="process-meta-item">
+                  <span class="m-label">Deliverable</span>
+                  <span class="m-fill"></span>
+                  <span class="m-value">Script + storyboard</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="process-step" data-index="2">
+            <div class="process-card">
+              <span class="process-ghost">03</span>
+              <div class="process-tag">Phase 03 / Craft</div>
+              <h3>Motion &amp; delivery</h3>
+              <p>Careful, frame-by-frame motion design — composition, pacing, sound — built to carry a story and push real numbers in the channels you run.</p>
+              <div class="process-meta">
+                <div class="process-meta-item">
+                  <span class="m-label">Deliverable</span>
+                  <span class="m-fill"></span>
+                  <span class="m-value">Final film + masters</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
-        <div class="process-step">
-          <div class="process-card">
-            <span class="process-ghost">02</span>
-            <div class="process-tag">Phase 02 / Direction</div>
-            <h3>Script &amp; storyboard</h3>
-            <p>We write a tight, retentive script and storyboard it scene-by-scene, locking voice and music early — so nothing about the edit is a surprise later.</p>
-            <div class="process-meta">
-              <div class="process-meta-item">
-                <span class="m-label">Deliverable</span>
-                <span class="m-fill"></span>
-                <span class="m-value">Script + storyboard</span>
-              </div>
-            </div>
+        <div class="process-nav">
+          <button class="process-arrow" id="processPrev" type="button" aria-label="Previous step">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="process-indicators" id="processIndicators">
+            <button class="active" data-index="0" aria-label="Go to step 1"></button>
+            <button data-index="1" aria-label="Go to step 2"></button>
+            <button data-index="2" aria-label="Go to step 3"></button>
           </div>
-        </div>
-
-        <div class="process-step">
-          <div class="process-card">
-            <span class="process-ghost">03</span>
-            <div class="process-tag">Phase 03 / Craft</div>
-            <h3>Motion &amp; delivery</h3>
-            <p>Careful, frame-by-frame motion design — composition, pacing, sound — built to carry a story and push real numbers in the channels you run.</p>
-            <div class="process-meta">
-              <div class="process-meta-item">
-                <span class="m-label">Deliverable</span>
-                <span class="m-fill"></span>
-                <span class="m-value">Final film + masters</span>
-              </div>
-            </div>
-          </div>
+          <button class="process-arrow" id="processNext" type="button" aria-label="Next step">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- OFFERS -->
-  <section id="offers">
+  <!-- TESTIMONIALS -->
+  <!-- Same auto-scrolling marquee pattern as "Our clients" below. Every card uses the
+       same .testi-card markup (no stars, no featured/dark variant) — list each review
+       once here, the script duplicates the row automatically for the seamless loop. -->
+  <section id="testimonials">
     <div class="wrap">
       <div class="offers-head reveal">
-        <div class="offers-eyebrow"><span></span>What you can hire us for<span></span></div>
-        <h2>Three ways to work.</h2>
-        <p>Every project starts the same way — script, storyboard, edit. What changes is the format and the cadence.</p>
+        <div class="offers-eyebrow"><span></span>What our clients think of us<span></span></div>
+        <h2>Real feedback,<br>real results.</h2>
+        <p>A few words from people we've worked with.</p>
       </div>
+    </div>
 
-      <div class="offers-grid reveal">
-        <div class="offer-card">
-          <div class="offer-tag">01 / Per project</div>
-          <h3>SaaS Explainer Film</h3>
-          <p class="offer-desc">Turn a complex product into a story someone will actually sit through.</p>
-          <ul class="offer-list">
-            <li>60–75s film</li>
-            <li>Scripting + storyboarding</li>
-            <li>5 revisions included</li>
-            <li>Voiceover included</li>
-          </ul>
-          <a href="https://cal.com/adi-hjpcbf/30min" target="_blank" rel="noopener" class="offer-link">Book a call <span>↗</span></a>
+    <div class="testi-marquee reveal">
+      <div class="testi-track" id="testimonialsTrack">
+        <div class="testi-card">
+          <p class="testi-quote">"Good work and great attention to detail. Professional, creative, and delivered exactly what we needed."</p>
+          <div class="testi-person">
+            <div class="testi-avatar"><img src="liisto logo.png" alt="Rob"></div>
+            <div>
+              <div class="testi-name">Rob</div>
+              <div class="testi-role">Liistoapp</div>
+            </div>
+          </div>
         </div>
 
-        <div class="offer-card">
-          <div class="offer-tag">02 / Per project</div>
-          <h3>Product Launch Video</h3>
-          <p class="offer-desc">A new feature or product drop, built to land with weight.</p>
-          <ul class="offer-list">
-            <li>30–45s film</li>
-            <li>Scripting + storyboarding</li>
-            <li>3 revisions included</li>
-            <li>Voiceover included</li>
-          </ul>
-          <a href="https://cal.com/adi-hjpcbf/30min" target="_blank" rel="noopener" class="offer-link">Book a call <span>↗</span></a>
+        <div class="testi-card">
+          <p class="testi-quote">"Excellent, excellent work! Pixelorylabis such a pleasure to work with and delivered beyond our means. He was very responsive and collaborative throughout the whole process and really helped bring our vision to life."</p>
+          <div class="testi-person">
+            <div class="testi-avatar"><img src="fp_red.png" alt="Miles"></div>
+            <div>
+              <div class="testi-name">Milesflowerpot</div>
+              <div class="testi-role">Flowerpot</div>
+            </div>
+          </div>
         </div>
 
-        <div class="offer-card offer-card-featured">
-          <div class="offer-badge">Retainer</div>
-          <div class="offer-tag">03 / Flagship</div>
-          <h3>Content & Ad Creative</h3>
-          <p class="offer-desc">A steady output of short-form content and ad creative, built for the channels you run.</p>
-          <ul class="offer-list">
-            <li>Short-form videos on a set cadence</li>
-            <li>9:16 and 16:9, both included</li>
-            <li>3 revisions per piece</li>
-            <li>Cut for retention and conversions</li>
-            <li>Retainer — discounted per-video rate</li>
-          </ul>
-          <a href="https://cal.com/adi-hjpcbf/30min" target="_blank" rel="noopener" class="offer-link">Book a call <span>↗</span></a>
+        <div class="testi-card">
+          <p class="testi-quote">"Great to work with, responsive, easy to communicate with, and delivered solid sound design that matched the animation really well. Would definitely work together again."</p>
+          <div class="testi-person">
+            <div class="testi-avatar"><img src="photonic.jpg" alt="Shaikh Abdullah"></div>
+            <div>
+              <div class="testi-name">Shaikh Abdullah</div>
+              <div class="testi-role">photonic_artistry</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testi-card">
+          <p class="testi-quote">"Great work as always. Can't recommend Pixelorylab enough!"</p>
+          <div class="testi-person">
+            <div class="testi-avatar"><img src="fp_red.png" alt="Mimi"></div>
+            <div>
+              <div class="testi-name">Mimi</div>
+              <div class="testi-role">Flowerpot</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1244,7 +1592,7 @@
               <span class="faq-plus"></span>
             </button>
             <div class="faq-a">
-              <div class="faq-a-inner">After your 60% deposit, we send a structured intake form where you share your brief, brand assets, UI references (Figma links or screenshots), and any inspiration videos. Script is optional at this stage. We then build a full Figma storyboard and refine the script with you. Before production begins, we hop on a short finalization call to confirm everything looks right. We then edit the full video, you get one revision round via Frame.io, and we deliver the final file.</div>
+              <div class="faq-a-inner">After your 50% deposit, we send a structured intake form where you share your brief, brand assets, UI references (Figma links or screenshots), and any inspiration videos. Script is optional at this stage. We confirm the direction with you before production begins, then edit the full video. You review the draft via Frame.io, we apply your revisions across up to three rounds, and deliver the final file.</div>
             </div>
           </div>
 
@@ -1266,7 +1614,7 @@
               <span class="faq-plus"></span>
             </button>
             <div class="faq-a">
-              <div class="faq-a-inner">Each video is delivered within 10 business days of receiving your completed assets, with rush delivery in 5 business days available for an additional flat fee. Retainer work runs on an ongoing cadence we agree on upfront.</div>
+              <div class="faq-a-inner">Each video is delivered within 12-14 business days of receiving your completed assets. Retainer work runs on an ongoing cadence we agree on upfront.</div>
             </div>
           </div>
 
@@ -1277,7 +1625,7 @@
               <span class="faq-plus"></span>
             </button>
             <div class="faq-a">
-              <div class="faq-a-inner">One revision round is included on every project. You review the draft via Frame.io and leave timestamped comments, we apply your changes and deliver the final file. Additional revision rounds are available for a flat fee.</div>
+              <div class="faq-a-inner">Three revision rounds are included on every project. You review the draft via Frame.io and leave timestamped comments, we apply your changes across each round and deliver the final file once you're happy with it.</div>
             </div>
           </div>
 
@@ -1288,7 +1636,7 @@
               <span class="faq-plus"></span>
             </button>
             <div class="faq-a">
-              <div class="faq-a-inner">Project based pricing runs from $800 to $5,500 per video depending on complexity and the editor assigned. Retainer plans start at $6,000 per month for four videos a month with priority turnaround. Get in touch for a quote.</div>
+              <div class="faq-a-inner">Project based pricing runs from $400 to $5,000 per video depending on complexity. Retainer plans start at $1,400 per month for three videos, with priority turnaround. Get in touch for a quote.</div>
             </div>
           </div>
 
@@ -1315,7 +1663,7 @@
         <h2>Let's talk about<br><span class="dim">your project.</span></h2>
         <p>Pick a time that works for you. We'll walk through your goals, the type of video you need, and what the process looks like from there.</p>
       </div>
-      <div style="max-width:1100px;margin:0 auto;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);background:#fff;padding-top:20px;">
+      <div class="booking-panel">
         <div id="cal-inline-booking" style="width:100%;height:100%;overflow:auto;"></div>
       </div>
     </div>
@@ -1324,13 +1672,15 @@
     (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
     Cal("init", "30min", {origin:"https://cal.com"});
 
+    var calTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+
     Cal.ns["30min"]("inline", {
       elementOrSelector:"#cal-inline-booking",
-      config: {"layout":"month_view", "theme":"light"},
+      config: {"layout":"month_view", "theme":calTheme},
       calLink: "adi-hjpcbf/30min",
     });
 
-    Cal.ns["30min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view","theme":"light"});
+    Cal.ns["30min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view","theme":calTheme});
   </script>
 
   <!-- CONTACT -->
@@ -1520,7 +1870,7 @@
       <div class="footer-col">
         <div class="footer-col-label">Sections</div>
         <a href="#work" id="footerWorkLink">Work</a>
-        <a href="#offers" id="footerOffersLink">Offers</a>
+        <a href="#testimonials" id="footerOffersLink">Reviews</a>
         <a href="#portfolio" id="footerPortfolioLink">Portfolio</a>
       </div>
       <div class="footer-col">
@@ -1547,6 +1897,18 @@
 </a>
 
 <script>
+  // ===== DARK MODE TOGGLE =====
+  (function(){
+    const root = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try{ localStorage.setItem('pl-theme', next); }catch(e){}
+    });
+  })();
+
   // ===== PAGE LOADER =====
   (function(){
     const loader = document.getElementById('pageLoader');
@@ -1830,12 +2192,59 @@
     });
   });
 
-  // sticky nav shadow
+  // sticky nav shadow + shrink to logo/Book-a-Call once scrolled
   const nav = document.getElementById('mainNav');
+  const navLinksEl = nav.querySelector('.nav-links');
+
+  // The collapse animates the max-width of .nav-links down to 0. If that
+  // max-width starts far larger than the links actually need (it was a
+  // fixed 600px), the transition spends its first chunk of time shrinking
+  // through empty headroom before anything visibly moves, then "catches up"
+  // all at once — that's what reads as stiff/uneven. Measuring the real
+  // content width and using that as the starting point makes the whole
+  // range of the transition visible, so it shrinks smoothly and evenly
+  // from the very first frame.
+  function syncNavLinksWidth(){
+    const prevMaxWidth = navLinksEl.style.maxWidth;
+    navLinksEl.style.maxWidth = 'none';
+    const naturalWidth = navLinksEl.scrollWidth;
+    navLinksEl.style.maxWidth = prevMaxWidth;
+    navLinksEl.style.setProperty('--nav-links-natural-width', naturalWidth + 'px');
+  }
+  syncNavLinksWidth();
+  window.addEventListener('resize', syncNavLinksWidth);
+
+  // Throttle with requestAnimationFrame so the class toggle (and the CSS
+  // transition it kicks off) is only evaluated once per paint, instead of
+  // on every raw scroll event — that's what keeps the shrink/expand buttery
+  // instead of janky on fast trackpad/wheel scrolls.
+  //
+  // Two different thresholds (not one) give the toggle hysteresis: collapse
+  // only fires past 80px, expand only fires back below 40px. With a single
+  // shared threshold, momentum/trackpad scrolling that hovers right around
+  // that line re-triggers the class over and over, which cuts the expand
+  // transition off mid-flight every time and is exactly what reads as
+  // "not smooth". The gap between the two numbers is dead space the
+  // scroll position can sit in without re-firing anything.
+  let navScrollTicking = false;
+  let navIsScrolled = false;
+  function updateNavScrolledState(){
+    const y = window.scrollY;
+    if(!navIsScrolled && y > 80){
+      nav.classList.add('scrolled');
+      navIsScrolled = true;
+    } else if(navIsScrolled && y < 40){
+      nav.classList.remove('scrolled');
+      navIsScrolled = false;
+    }
+    navScrollTicking = false;
+  }
   window.addEventListener('scroll', () => {
-    if(window.scrollY > 20) nav.classList.add('scrolled');
-    else nav.classList.remove('scrolled');
-  });
+    if(!navScrollTicking){
+      requestAnimationFrame(updateNavScrolledState);
+      navScrollTicking = true;
+    }
+  }, {passive:true});
 
   // hero featured-video blur-to-clear on scroll (hero only)
   const heroVideoPanel = document.querySelector('.hero .video-panel');
@@ -1858,15 +2267,23 @@
     updateHeroBlur();
   }
 
-  // featured video panel — starts muted+looping automatically; pill toggles sound
+  // featured video panel — starts muted+looping automatically; both the
+  // pill and the whole video panel toggle sound (clicking the pill doesn't
+  // double-toggle since the click is stopped from bubbling to the panel)
+  const featureVideoPanel = document.querySelector('.video-panel');
   const featureVideo = document.querySelector('.video-panel .feature-video');
   const featureMutePill = document.querySelector('.video-panel .mute-pill');
-  if(featureVideo && featureMutePill){
+  if(featureVideo && featureMutePill && featureVideoPanel){
     featureVideo.play().catch(() => {});
-    featureMutePill.addEventListener('click', () => {
+    const toggleFeatureMute = () => {
       featureVideo.muted = !featureVideo.muted;
       featureMutePill.textContent = featureVideo.muted ? 'Unmute film' : 'Mute film';
+    };
+    featureMutePill.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFeatureMute();
     });
+    featureVideoPanel.addEventListener('click', toggleFeatureMute);
   }
 
   // scroll reveal
@@ -1881,22 +2298,34 @@
   }, {threshold:0.15});
   revealEls.forEach(el => io.observe(el));
 
-  // process timeline — staggered step reveal + spine fill
-  const processTimeline = document.getElementById('processTimeline');
-  if(processTimeline){
-    const steps = Array.from(processTimeline.querySelectorAll('.process-step'));
-    const processIO = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if(e.isIntersecting){
-          processTimeline.classList.add('in');
-          steps.forEach((step, i) => {
-            setTimeout(() => step.classList.add('in'), i * 140);
-          });
-          processIO.disconnect();
-        }
-      });
-    }, {threshold:0.2});
-    processIO.observe(processTimeline);
+  // process carousel — pure opacity crossfade, one card visible at a time
+  const processStage = document.getElementById('processStage');
+  if(processStage){
+    const steps = Array.from(processStage.querySelectorAll('.process-step'));
+    const dots = Array.from(document.querySelectorAll('#processIndicators button'));
+    const prevBtn = document.getElementById('processPrev');
+    const nextBtn = document.getElementById('processNext');
+    let current = 0;
+
+    const setStageHeight = () => {
+      processStage.style.height = steps[current].offsetHeight + 'px';
+    };
+    requestAnimationFrame(setStageHeight);
+
+    const goTo = (index) => {
+      current = (index + steps.length) % steps.length;
+      steps.forEach((step, i) => step.classList.toggle('active', i === current));
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === current));
+      setStageHeight();
+    };
+
+    nextBtn.addEventListener('click', () => goTo(current + 1));
+    prevBtn.addEventListener('click', () => goTo(current - 1));
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => goTo(Number(dot.dataset.index)));
+    });
+
+    window.addEventListener('resize', setStageHeight);
   }
 
 
@@ -2011,19 +2440,6 @@
     // from the Portfolio view or scrolling to it again from the Home page.
     navigateTo('home', 'process');
   });
-  const navOffers = document.getElementById('navOffers');
-  navOffers.addEventListener('click', (e) => {
-    e.preventDefault();
-    if(document.body.classList.contains('portfolio-active')){
-      // currently on the Portfolio view — switch to Home instantly, then just scroll to Offers
-      showView('home');
-      requestAnimationFrame(() => {
-        document.getElementById('offers').scrollIntoView({behavior:'smooth', block:'start'});
-      });
-    } else {
-      document.getElementById('offers').scrollIntoView({behavior:'smooth', block:'start'});
-    }
-  });
   const navFaq = document.getElementById('navFaq');
   navFaq.addEventListener('click', (e) => {
     e.preventDefault();
@@ -2056,6 +2472,73 @@
       navigateTo('home', 'book');
     });
   }
+
+  // ===== mobile hamburger menu (logo + 3-line trigger + mode toggle on phones) =====
+  const navHamburger = document.getElementById('navHamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const mobileMenuBackdrop = document.getElementById('mobileMenuBackdrop');
+
+  function openMobileMenu(){
+    mobileMenu.classList.add('open');
+    mobileMenuBackdrop.classList.add('open');
+    navHamburger.classList.add('active');
+    navHamburger.setAttribute('aria-expanded', 'true');
+    mobileMenu.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('mobile-menu-open');
+  }
+  function closeMobileMenu(){
+    mobileMenu.classList.remove('open');
+    mobileMenuBackdrop.classList.remove('open');
+    navHamburger.classList.remove('active');
+    navHamburger.setAttribute('aria-expanded', 'false');
+    mobileMenu.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('mobile-menu-open');
+  }
+  navHamburger.addEventListener('click', () => {
+    if(mobileMenu.classList.contains('open')) closeMobileMenu();
+    else openMobileMenu();
+  });
+  mobileMenuBackdrop.addEventListener('click', closeMobileMenu);
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && mobileMenu.classList.contains('open')) closeMobileMenu();
+  });
+  window.addEventListener('resize', () => {
+    if(window.innerWidth > 640 && mobileMenu.classList.contains('open')) closeMobileMenu();
+  });
+
+  // each mobile link mirrors its desktop nav-icon counterpart's behavior,
+  // then closes the dropdown once the navigation has been triggered
+  const mobileNavMap = [
+    ['mobileNavHome', navHome],
+    ['mobileNavPortfolio', navPortfolio],
+    ['mobileNavProcess', navProcess],
+    ['mobileNavFaq', navFaq],
+    ['mobileNavContact', navContact],
+    ['mobileNavBookCall', navBookCall],
+  ];
+  mobileNavMap.forEach(([mobileId, desktopEl]) => {
+    const mobileEl = document.getElementById(mobileId);
+    if(!mobileEl || !desktopEl) return;
+    mobileEl.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeMobileMenu();
+      desktopEl.click();
+    });
+  });
+
+  // keep the mobile Home/Portfolio active states in sync with the desktop ones
+  const mobileNavHomeEl = document.getElementById('mobileNavHome');
+  const mobileNavPortfolioEl = document.getElementById('mobileNavPortfolio');
+  if(mobileNavHomeEl && mobileNavPortfolioEl){
+    const syncMobileActive = () => {
+      mobileNavHomeEl.classList.toggle('active', navHome.classList.contains('active'));
+      mobileNavPortfolioEl.classList.toggle('active', navPortfolio.classList.contains('active'));
+    };
+    const navActiveObserver = new MutationObserver(syncMobileActive);
+    navActiveObserver.observe(navHome, {attributes:true, attributeFilter:['class']});
+    navActiveObserver.observe(navPortfolio, {attributes:true, attributeFilter:['class']});
+  }
+
   // ===== Our clients marquee =====
   // Repeats the logo row enough times to comfortably fill (2x) the visible
   // width, then scrolls by exactly half the total track width — since every
@@ -2086,16 +2569,51 @@
 
     const decode = imgs.map(img => img.decode ? img.decode().catch(() => {}) : Promise.resolve());
     Promise.all(decode).then(build);
-
-    // Mobile browsers fire 'resize' when the address bar shows/hides on scroll,
-    // even though the width hasn't changed. Only rebuild on genuine width changes
-    // so the track isn't torn down and repainted mid-scroll on mobile.
-    let lastWidth = window.innerWidth;
     window.addEventListener('resize', () => {
-      if(window.innerWidth === lastWidth) return;
-      lastWidth = window.innerWidth;
       clearTimeout(window.__clientsMarqueeResizeT);
       window.__clientsMarqueeResizeT = setTimeout(build, 200);
+    });
+  })();
+
+  // ===== Testimonials marquee =====
+  // Same approach as the clients marquee above: repeat the review cards enough
+  // times to fill (2x) the visible width, then scroll by exactly half the
+  // total track width so the loop is seamless no matter how many/few reviews
+  // are listed in the HTML.
+  (function setupTestimonialsMarquee(){
+    const track = document.getElementById('testimonialsTrack');
+    if(!track) return;
+    const marquee = track.parentElement;
+    const originalHTML = track.innerHTML;
+    const isMobile = () => window.matchMedia('(max-width:700px)').matches;
+
+    function build(){
+      // Mobile: plain touch-swipeable strip, original cards only, no
+      // auto-scroll animation and no duplicated copies (see CSS above).
+      if(isMobile()){
+        track.innerHTML = originalHTML;
+        track.style.animation = 'none';
+        return;
+      }
+      track.innerHTML = originalHTML;
+      const setWidth = track.scrollWidth;
+      const containerWidth = marquee.offsetWidth || window.innerWidth;
+      if(setWidth === 0) return;
+      let copies = Math.max(2, Math.ceil((containerWidth * 2) / setWidth));
+      if(copies % 2 !== 0) copies++;
+      for(let i = 1; i < copies; i++){
+        track.insertAdjacentHTML('beforeend', originalHTML);
+      }
+      const totalWidth = track.scrollWidth;
+      const pxPerSecond = 40;
+      const duration = (totalWidth / 2) / pxPerSecond;
+      track.style.animation = `testi-scroll ${duration}s linear infinite`;
+    }
+
+    build();
+    window.addEventListener('resize', () => {
+      clearTimeout(window.__testiMarqueeResizeT);
+      window.__testiMarqueeResizeT = setTimeout(build, 200);
     });
   })();
 
@@ -2114,7 +2632,7 @@
   if(footerOffersLink){
     footerOffersLink.addEventListener('click', (e) => {
       e.preventDefault();
-      navigateTo('home', 'offers');
+      navigateTo('home', 'testimonials');
     });
   }
   const footerPortfolioLink = document.getElementById('footerPortfolioLink');
