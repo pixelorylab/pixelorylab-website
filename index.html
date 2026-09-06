@@ -1306,10 +1306,10 @@
     <div class="clients-label">Our clients</div>
     <div class="clients-marquee">
       <div class="clients-track" id="clientsTrack">
-        <img src="flowerpotred.png" alt="Flowerpot" loading="lazy" decoding="async">
-        <img src="frontier logo-Photoroom.png" alt="Frontier" loading="lazy" decoding="async">
-        <img src="liisto logo.png" alt="Liisto" loading="lazy" decoding="async">
-        <img src="oak park nobg-Photoroom.png" alt="Oak Park" loading="lazy" decoding="async">
+        <img src="flowerpotred.png" alt="Flowerpot">
+        <img src="frontier logo-Photoroom.png" alt="Frontier">
+        <img src="liisto logo.png" alt="Liisto">
+        <img src="oak park nobg-Photoroom.png" alt="Oak Park">
       </div>
     </div>
   </section>
@@ -2582,7 +2582,13 @@
     }
 
     const decode = imgs.map(img => img.decode ? img.decode().catch(() => {}) : Promise.resolve());
-    const runBuild = () => Promise.all(decode).then(build);
+    // race against a timeout so a stalled/slow image decode can never
+    // permanently block the marquee from ever building
+    const decodeOrTimeout = Promise.race([
+      Promise.all(decode),
+      new Promise(resolve => setTimeout(resolve, 1500))
+    ]);
+    const runBuild = () => decodeOrTimeout.then(build);
     // defer off the initial-load main-thread work; runs once the browser
     // is idle (or after 2s at the latest) instead of competing with
     // first paint / hero content
