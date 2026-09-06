@@ -1291,7 +1291,7 @@
       </div>
 
       <div class="video-panel reveal load-reveal">
-        <video class="feature-video" src="launch.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <video class="feature-video" src="launch.mp4" autoplay muted loop playsinline preload="metadata"></video>
         <div class="glow"></div>
         <button class="mute-pill" type="button">Unmute film</button>
       </div>
@@ -1306,10 +1306,10 @@
     <div class="clients-label">Our clients</div>
     <div class="clients-marquee">
       <div class="clients-track" id="clientsTrack">
-        <img src="flowerpotred.png" alt="Flowerpot">
-        <img src="frontier logo-Photoroom.png" alt="Frontier">
-        <img src="liisto logo.png" alt="Liisto">
-        <img src="oak park nobg-Photoroom.png" alt="Oak Park">
+        <img src="flowerpotred.png" alt="Flowerpot" loading="lazy" decoding="async">
+        <img src="frontier logo-Photoroom.png" alt="Frontier" loading="lazy" decoding="async">
+        <img src="liisto logo.png" alt="Liisto" loading="lazy" decoding="async">
+        <img src="oak park nobg-Photoroom.png" alt="Oak Park" loading="lazy" decoding="async">
       </div>
     </div>
   </section>
@@ -1508,7 +1508,7 @@
         <div class="testi-card">
           <p class="testi-quote">"Good work and great attention to detail. Professional, creative, and delivered exactly what we needed."</p>
           <div class="testi-person">
-            <div class="testi-avatar"><img src="liisto logo.png" alt="Rob"></div>
+            <div class="testi-avatar"><img src="liisto logo.png" alt="Rob" loading="lazy" decoding="async"></div>
             <div>
               <div class="testi-name">Rob</div>
               <div class="testi-role">Liistoapp</div>
@@ -1519,7 +1519,7 @@
         <div class="testi-card">
           <p class="testi-quote">"Excellent, excellent work! Pixelorylabis such a pleasure to work with and delivered beyond our means. He was very responsive and collaborative throughout the whole process and really helped bring our vision to life."</p>
           <div class="testi-person">
-            <div class="testi-avatar"><img src="fp_red.png" alt="Miles"></div>
+            <div class="testi-avatar"><img src="fp_red.png" alt="Miles" loading="lazy" decoding="async"></div>
             <div>
               <div class="testi-name">Milesflowerpot</div>
               <div class="testi-role">Flowerpot</div>
@@ -1530,7 +1530,7 @@
         <div class="testi-card">
           <p class="testi-quote">"Great to work with, responsive, easy to communicate with, and delivered solid sound design that matched the animation really well. Would definitely work together again."</p>
           <div class="testi-person">
-            <div class="testi-avatar"><img src="photonic.jpg" alt="Shaikh Abdullah"></div>
+            <div class="testi-avatar"><img src="photonic.jpg" alt="Shaikh Abdullah" loading="lazy" decoding="async"></div>
             <div>
               <div class="testi-name">Shaikh Abdullah</div>
               <div class="testi-role">photonic_artistry</div>
@@ -1541,7 +1541,7 @@
         <div class="testi-card">
           <p class="testi-quote">"Great work as always. Can't recommend Pixelorylab enough!"</p>
           <div class="testi-person">
-            <div class="testi-avatar"><img src="fp_red.png" alt="Mimi"></div>
+            <div class="testi-avatar"><img src="fp_red.png" alt="Mimi" loading="lazy" decoding="async"></div>
             <div>
               <div class="testi-name">Mimi</div>
               <div class="testi-role">Flowerpot</div>
@@ -1858,7 +1858,7 @@
   <div class="footer-card">
     <div class="footer-top">
       <div class="footer-logo">
-        <img src="white logo-Photoroom.png" alt="Pixelorylab">
+        <img src="white logo-Photoroom.png" alt="Pixelorylab" loading="lazy" decoding="async">
       </div>
       <div class="footer-tagline">For ambitious products.<br>Told better.</div>
     </div>
@@ -2028,14 +2028,12 @@
       return;
     }
 
-    video.src = cfg.file;
     video.muted = true;
     if (cfg.poster) video.poster = cfg.poster; // thumbnail shown before playback starts
-    video.load();
 
     // if the file doesn't exist / hasn't been added yet, fall back to
     // the placeholder look instead of breaking the layout — but log
-    // why, so a typo or missing file is easy to spot
+    // why, so a typo or typo is easy to spot
     video.addEventListener('error', () => {
       hasVideoTarget.classList.remove('has-video');
       console.warn('Could not load video: "' + cfg.file + '". Check the file exists in your videos/ folder, the filename matches exactly, and you\'re viewing this page through a local server (not by double-clicking the file).');
@@ -2047,6 +2045,22 @@
       // playpause tiles: metadata/poster is ready, but playback only
       // starts once the button is clicked — never automatically
     }, { once: true });
+
+    // defer actually fetching the video file (even just its metadata)
+    // until the tile is about to scroll into view, so tiles further
+    // down the page don't compete for bandwidth on initial page load
+    let videoSrcRequested = false;
+    const lazyLoadIO = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !videoSrcRequested) {
+          videoSrcRequested = true;
+          video.src = cfg.file;
+          video.load();
+          lazyLoadIO.disconnect();
+        }
+      });
+    }, { rootMargin: '600px' });
+    lazyLoadIO.observe(tile);
 
     if (controlType === 'playpause') {
       setPlayState(false); // thumbnail shown by default, nothing plays until clicked
@@ -2568,7 +2582,12 @@
     }
 
     const decode = imgs.map(img => img.decode ? img.decode().catch(() => {}) : Promise.resolve());
-    Promise.all(decode).then(build);
+    const runBuild = () => Promise.all(decode).then(build);
+    // defer off the initial-load main-thread work; runs once the browser
+    // is idle (or after 2s at the latest) instead of competing with
+    // first paint / hero content
+    if ('requestIdleCallback' in window) requestIdleCallback(runBuild, { timeout: 2000 });
+    else setTimeout(runBuild, 200);
     window.addEventListener('resize', () => {
       clearTimeout(window.__clientsMarqueeResizeT);
       window.__clientsMarqueeResizeT = setTimeout(build, 200);
@@ -2610,7 +2629,10 @@
       track.style.animation = `testi-scroll ${duration}s linear infinite`;
     }
 
-    build();
+    // defer off the initial-load main-thread work, same as the clients
+    // marquee above
+    if ('requestIdleCallback' in window) requestIdleCallback(build, { timeout: 2000 });
+    else setTimeout(build, 200);
     window.addEventListener('resize', () => {
       clearTimeout(window.__testiMarqueeResizeT);
       window.__testiMarqueeResizeT = setTimeout(build, 200);
