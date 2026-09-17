@@ -1306,10 +1306,10 @@
     <div class="clients-label">Our clients</div>
     <div class="clients-marquee">
       <div class="clients-track" id="clientsTrack">
-        <img src="flowerpotred.png" alt="Flowerpot">
-        <img src="frontier logo-Photoroom.png" alt="Frontier">
-        <img src="liisto logo.png" alt="Liisto">
-        <img src="oak park nobg-Photoroom.png" alt="Oak Park">
+        <img src="flowerpotred.png" alt="Flowerpot" loading="lazy" decoding="async">
+        <img src="frontier logo-Photoroom.png" alt="Frontier" loading="lazy" decoding="async">
+        <img src="liisto logo.png" alt="Liisto" loading="lazy" decoding="async">
+        <img src="oak park nobg-Photoroom.png" alt="Oak Park" loading="lazy" decoding="async">
       </div>
     </div>
   </section>
@@ -1401,9 +1401,9 @@
               <button class="proj-mute" type="button">Play</button>
             </div>
             <div class="proj-meta">
-              <h3>Flowerpot</h3>
-              <div class="proj-cat">Product story</div>
-              <div class="proj-desc">Brand story animation</div>
+              <h3>Chatgpt x Ubereats</h3>
+              <div class="proj-cat">Feature Explainer</div>
+              <div class="proj-desc">Personal project</div>
             </div>
           </div>
         </div>
@@ -1956,7 +1956,7 @@
   const HOME_PROJECT_VIDEOS = {
     Liistoapp:  { file: "liisto.mp4", poster: "liistoapp thumbnail.png" },
     Wise:  { file: "wise.mp4", poster: "wise thumb.png" },
-    Flowerpot: { file: "flowerpot.mp4", poster: "flower thumb.png" }
+    Flowerpot: { file: "chatgpt x ubereats.mp4", poster: "ubereats.png" }
   };
 
   // Portfolio page — "Case studies" grid
@@ -1968,7 +1968,7 @@
     5: { file: "predix.mp4", title: "Predix", desc: "Personal Project" },
     6: { file: "Spotify 2.0.mp4", title: "Spotify 2.0", desc: "Personal Project" },
     7: { file: "Google Gemini SAAS.mp4", title: "Google Gemini", desc: "Personal Project" },
-    8: { file: "notion sfx.mp4", title: "Notion", desc: "Personal Project" }
+    8: { file: "chatgpt x ubereats.mp4", title: "Chatgpt x Ubereats", desc: "Personal Project" }
   };
 
   // tracks every wired-up video so unmuting one can mute the rest
@@ -2582,13 +2582,7 @@
     }
 
     const decode = imgs.map(img => img.decode ? img.decode().catch(() => {}) : Promise.resolve());
-    // race against a timeout so a stalled/slow image decode can never
-    // permanently block the marquee from ever building
-    const decodeOrTimeout = Promise.race([
-      Promise.all(decode),
-      new Promise(resolve => setTimeout(resolve, 1500))
-    ]);
-    const runBuild = () => decodeOrTimeout.then(build);
+    const runBuild = () => Promise.all(decode).then(build);
     // defer off the initial-load main-thread work; runs once the browser
     // is idle (or after 2s at the latest) instead of competing with
     // first paint / hero content
