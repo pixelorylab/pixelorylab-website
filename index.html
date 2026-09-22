@@ -12,8 +12,8 @@
     }catch(e){}
   })();
 </script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pixelorylab — Motion Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pixelorylab — Launch & product videos for SaaS, AI and Startups</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="shortcut icon" type="image/png" href="favicon-Photoroom.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,8 +76,10 @@
     background-attachment:scroll, scroll;
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
-    zoom:1.02;
     transition:background .2s ease;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
   }
   body.portfolio-active{
     background-color:#ffffff;
@@ -101,6 +103,7 @@
   a{color:inherit;text-decoration:none;}
   img{display:block;max-width:100%;}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad);}
+  main#top{display:flex;flex-direction:column;flex:1 1 auto;}
 
   /* ===== PAGE LOADER ===== */
   html.is-loading, html.is-loading body{overflow:hidden;height:100%;}
@@ -138,7 +141,7 @@
   }
 
   /* ===== NAV ===== */
-  .nav-outer{position:sticky;top:0;z-index:250;padding:20px var(--pad) 0;}
+  .nav-outer{position:sticky;top:0;z-index:250;padding:calc(20px + env(safe-area-inset-top,0px)) calc(var(--pad) + env(safe-area-inset-right,0px)) 0 calc(var(--pad) + env(safe-area-inset-left,0px));}
   .nav{
     max-width:fit-content;
     margin:0 auto;
@@ -188,13 +191,19 @@
 
   .nav-links{
     display:flex;align-items:center;gap:4px;overflow:hidden;
-    max-width:var(--nav-links-natural-width, 600px);opacity:1;
-    /* EXPAND (this rule is the "target" state when .scrolled is removed):
-       a touch slower than the collapse, with opacity starting a beat after
-       the width does, so the labels don't pop to full brightness while the
-       pill is still visibly growing — they ease in alongside it instead. */
-    transition:max-width .7s cubic-bezier(.22,1,.36,1),opacity .5s cubic-bezier(.22,1,.36,1) .12s,margin .7s cubic-bezier(.22,1,.36,1);
+    max-width:0;opacity:0;margin:0;pointer-events:none;
+    /* COLLAPSED is now the default state — only logo, theme toggle and
+       Book a Call show until the nav is hovered (or focused via keyboard). */
+    transition:max-width .6s cubic-bezier(.16,1,.3,1),opacity .45s cubic-bezier(.16,1,.3,1),margin .6s cubic-bezier(.16,1,.3,1);
     will-change:max-width,opacity;
+  }
+  .nav:hover .nav-links,
+  .nav:focus-within .nav-links{
+    max-width:var(--nav-links-natural-width, 600px);opacity:1;pointer-events:auto;
+    /* EXPAND on hover/focus: a touch slower than the collapse, with opacity
+       starting a beat after the width does, so the labels don't pop to full
+       brightness while the pill is still visibly growing. */
+    transition:max-width .7s cubic-bezier(.22,1,.36,1),opacity .5s cubic-bezier(.22,1,.36,1) .12s,margin .7s cubic-bezier(.22,1,.36,1);
   }
   .nav-icon{
     display:inline-flex;align-items:center;
@@ -218,19 +227,13 @@
     }
   }
 
-  /* ===== shrink nav to logo + Book a Call once the page is scrolled ===== */
-  .nav.scrolled .nav-links{
-    max-width:0;opacity:0;margin:0;pointer-events:none;
-    /* COLLAPSE (target state when .scrolled is added) — back to the
-       original single-curve timing, shared by width/opacity/margin. */
-    transition:max-width .6s cubic-bezier(.16,1,.3,1),opacity .45s cubic-bezier(.16,1,.3,1),margin .6s cubic-bezier(.16,1,.3,1);
-  }
+  /* ===== nav shadow deepens once the page is scrolled ===== */
   .theme-toggle{
     overflow:hidden;
     transition:background .25s ease,color .25s ease,transform .2s ease;
   }
-  /* NOTE: the theme toggle intentionally stays visible when the nav is
-     scrolled/shrunk — only .nav-links collapses. So the shrunk nav shows
+  /* NOTE: the theme toggle intentionally stays visible when the nav links
+     are collapsed — only .nav-links hides. So the shrunk nav shows
      logo + toggle + Book a Call, not just logo + Book a Call. */
 
   .nav-cta{
@@ -242,6 +245,12 @@
   .nav-cta:hover{transform:translateY(-1px);background:#222;}
   html[data-theme="dark"] .nav-cta{background:#f2f1ee;color:#0b0b0c;}
   html[data-theme="dark"] .nav-cta:hover{background:#ffffff;}
+  /* on narrower laptop/tablet windows (before the hamburger takes over)
+     the expanded nav-links + full "Book a Call" text can crowd the pill —
+     drop to just "Book" so the pill never has to fight for room */
+  @media(max-width:760px){
+    .nav-cta-full{display:none;}
+  }
 
   /* ===== HAMBURGER (mobile-only trigger for the dropdown menu below) ===== */
   .nav-hamburger{
@@ -275,7 +284,7 @@
   .mobile-menu{
     display:none;
     position:fixed;left:0;right:0;top:0;
-    padding:0 var(--pad);
+    padding:0 calc(var(--pad) + env(safe-area-inset-right,0px)) 0 calc(var(--pad) + env(safe-area-inset-left,0px));
     z-index:200;
     transform:translateY(-10px);opacity:0;pointer-events:none;
     transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .3s ease;
@@ -319,21 +328,23 @@
   }
   html[data-theme="dark"] .portfolio-view{background:#0b0b0a;}
   .portfolio-view.show{display:block;}
-  .portfolio-wrap{padding:0 var(--pad) 20px;max-width:1738px;margin-top:-56px;}
-  .portfolio-head{text-align:center;padding:0 0 48px 0;}
+  /* sizes below are measured from the reference page: 35.5px side margins,
+     20px column gap, 16:9 square-cornered tiles, 60px heading, 19px/13px caption */
+  .portfolio-wrap{padding:0 35.5px 20px;max-width:none;margin-top:-56px;}
+  .portfolio-head{text-align:center;padding:17px 0 90px 0;}
   .portfolio-head .eyebrow{margin-bottom:16px;}
-  .portfolio-head h1{font-size:72px;font-weight:800;letter-spacing:-0.02em;}
+  .portfolio-head h1{font-size:60px;font-weight:500;letter-spacing:-.045em;line-height:1;}
   .cs-grid{
-    display:grid;grid-template-columns:repeat(2,1fr);
-    gap:40px 28px;padding-bottom:64px;
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:74px 20px;padding-bottom:64px;
   }
   .cs-visual{
     position:relative;
-    width:100%;aspect-ratio:16/10;border-radius:20px;
+    width:100%;aspect-ratio:16/9;border-radius:0;
     background:#ffffff;
     display:flex;align-items:center;justify-content:center;
     color:transparent;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
-    margin-bottom:22px;overflow:hidden;
+    margin-bottom:0;overflow:hidden;
     box-shadow:0 0 0 1px var(--line) inset;
   }
   html[data-theme="dark"] .cs-visual{background:var(--paper);}
@@ -371,8 +382,8 @@
      hit-target fills those corners in so the entire button is clickable. */
   .cs-mute-btn::before{content:"";position:absolute;inset:0;border-radius:0;}
   html[data-theme="dark"] .cs-mute-btn{color:#0b0b0c;}
-  .cs-tile h3{font-size:19px;font-weight:700;margin-bottom:5px;}
-  .cs-tile p{font-size:14px;color:var(--gray-500);line-height:1.4;}
+  .cs-tile h3{font-size:19px;font-weight:500;letter-spacing:-.02em;line-height:24px;margin:13px 0 1px;}
+  .cs-tile p{font-size:13px;color:var(--gray-500);line-height:20px;}
   .portfolio-cta{text-align:center;padding:0 0 64px 0;}
   .portfolio-cta h2{font-size:32px;font-weight:700;margin-bottom:26px;}
 
@@ -380,8 +391,9 @@
     .portfolio-head h1{font-size:44px;}
   }
   @media(max-width:520px){
-    .cs-grid{grid-template-columns:1fr;}
+    .cs-grid{grid-template-columns:1fr;gap:44px 20px;}
     .portfolio-wrap{padding:40px 20px 20px;}
+    .portfolio-head{padding:0 0 48px 0;}
   }
 
   /* ===== PROCESS ===== */
@@ -493,10 +505,15 @@
   }
 
   /* ===== HERO ===== */
-  .hero{padding-top:128px;padding-bottom:70px;position:relative;overflow:hidden;}
+  .hero{
+    padding-top:80px;padding-bottom:0px;
+    flex:1 1 auto;
+    display:flex;flex-direction:column;justify-content:center;
+    position:relative;overflow:hidden;
+  }
   #services{padding-top:20px;padding-bottom:60px;}
   #work{padding-top:40px;padding-bottom:50px;}
-  .hero-inner{position:relative;width:100%;}
+  .hero-inner{position:relative;width:100%;text-align:center;}
   .hero-graphic{
     position:absolute;top:-114px;right:-40px;width:646px;height:646px;
     pointer-events:none;
@@ -570,16 +587,17 @@
     50%{transform:translateY(-12px) rotate(-4deg);}
   }
   h1.headline{
-    font-size:125px;line-height:0.94;font-weight:800;letter-spacing:-0.035em;
-    max-width:1100px;
+    font-size:72px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;
+    max-width:780px;margin:0 auto;
   }
   h1.headline .muted{color:var(--gray-500);}
+  .headline-break{display:none;}
   .sf-bold{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',sans-serif;font-weight:700;}
   .sf-medium{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',sans-serif;font-weight:500;}
   .hero-sub{
-    max-width:560px;margin-top:42px;font-size:17px;line-height:1.6;color:var(--gray-700);
+    max-width:480px;margin:26px auto 0;font-size:17px;line-height:1.6;color:var(--gray-700);
   }
-  .hero-cta{display:flex;align-items:center;gap:28px;margin-top:53px;}
+  .hero-cta{display:flex;align-items:center;justify-content:center;gap:28px;margin-top:40px;}
   .btn{
     display:inline-flex;align-items:center;gap:10px;
     background:var(--ink);color:#fff;
@@ -591,67 +609,26 @@
   .btn:hover{transform:translateY(-2px);background:#222;}
   .btn.light{background:#fff;color:var(--ink);}
   .btn.light:hover{background:#f0f0f0;}
-  html[data-theme="dark"] .btn:not(.light){background:#f2f1ee;color:#0b0b0c;}
-  html[data-theme="dark"] .btn:not(.light):hover{background:#ffffff;}
+  html[data-theme="dark"] .btn:not(.light):not(.btn-outline){background:#f2f1ee;color:#0b0b0c;}
+  html[data-theme="dark"] .btn:not(.light):not(.btn-outline):hover{background:#ffffff;}
   /* .btn.light always sits on the permanently-dark CTA panel, so its
      white-pill/dark-text look must stay fixed regardless of site theme */
   html[data-theme="dark"] .btn.light{color:#0b0b0c;}
+  .btn-outline{background:transparent;border:1px solid var(--line);color:var(--ink);}
+  .btn-outline:hover{background:var(--gray-100);}
+  html[data-theme="dark"] .btn-outline{background:transparent;}
+  html[data-theme="dark"] .btn-outline:hover{background:var(--gray-100);}
+  html[data-theme="dark"] .hero-cta .btn-outline{background:#fff;color:#0b0b0c;}
+  html[data-theme="dark"] .hero-cta .btn-outline:hover{background:#f0f0f0;color:#0b0b0c;}
   .link-arrow{font-size:14px;font-weight:600;color:var(--gray-700);display:inline-flex;align-items:center;gap:8px;}
   .link-arrow:hover{color:var(--ink);}
   .hr{border:none;border-top:1px solid var(--line);margin-top:105px;}
 
-  /* ===== FEATURED VIDEO PANEL ===== */
-  .feature-head{display:flex;justify-content:space-between;align-items:baseline;margin-top:150px;margin-bottom:24px;}
-  .feature-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gray-500);}
-  .feature-tag{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-500);}
-  .video-panel{
-    position:relative;width:100%;aspect-ratio:16/8.2;
-    border-radius:var(--radius-xl);
-    background:linear-gradient(160deg,#050506 0%,#0e0f13 55%,#141821 100%);
-    overflow:hidden;display:flex;align-items:center;justify-content:center;
-    filter:blur(var(--hero-blur, 0px));
-    will-change:filter;
-  }
-  .video-panel .glow{
-    position:absolute;inset:0;
-    background:radial-gradient(600px 300px at 30% 70%, rgba(90,110,160,.25), transparent 70%);
-  }
-  .feature-video{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;
-  }
-  .mute-pill{
-    position:absolute;bottom:22px;right:22px;z-index:2;
-    background:rgba(10,10,14,.6);backdrop-filter:blur(6px);
-    color:#fff;border:1px solid rgba(255,255,255,.25);
-    border-radius:var(--radius-full);padding:9px 16px;font-size:12px;
-    display:flex;align-items:center;gap:6px;cursor:pointer;
-    font-family:inherit;
-    box-shadow:0 6px 18px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.22);
-    transition:box-shadow .2s ease, transform .2s ease, background .2s ease;
-  }
-  .mute-pill:hover{
-    box-shadow:0 8px 22px rgba(0,0,0,.34), 0 3px 8px rgba(0,0,0,.26);
-  }
-  .video-panel{cursor:pointer;}
-  .video-panel .mute-pill{cursor:pointer;}
-  .float-tooltip{
-    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-    background:linear-gradient(90deg,#8b5cf6,#f59e0b);
-    border-radius:16px;padding:2px;
-    box-shadow:0 20px 60px rgba(0,0,0,.4);
-    animation:float 4s ease-in-out infinite;
-  }
-  @keyframes float{0%,100%{transform:translate(-50%,-50%) translateY(0);}50%{transform:translate(-50%,-50%) translateY(-10px);}}
-  .float-tooltip-inner{background:#0e0f13;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:280px;}
-  .float-tooltip-status{display:flex;align-items:center;gap:8px;font-size:12px;color:#f0c674;}
-  .float-tooltip-row{background:#fff;border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#111;font-weight:500;}
-  .float-tooltip-row span.circ{width:26px;height:26px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;}
-
   /* ===== OUR CLIENTS MARQUEE ===== */
-  .clients-section{padding:88px 0 96px;}
+  .clients-section{padding:88px 0 24px;}
   .clients-label{
     text-align:center;font-size:11px;font-weight:700;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--gray-500);margin-bottom:36px;
+    text-transform:uppercase;color:var(--gray-500);margin-bottom:18px;
   }
   .clients-marquee{
     position:relative;width:100%;overflow:hidden;
@@ -659,12 +636,13 @@
     -webkit-mask-image:linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
   }
   .clients-track{
-    display:flex;align-items:center;gap:96px;width:max-content;
+    display:flex;align-items:center;width:max-content;
     animation:clients-scroll 30s linear infinite;
   }
   .clients-marquee:hover .clients-track{animation-play-state:paused;}
   .clients-track img{
     height:136px;width:auto;object-fit:contain;flex-shrink:0;
+    margin-right:96px;
     opacity:.6;filter:grayscale(100%);
     transition:opacity .25s ease, filter .25s ease;
   }
@@ -681,13 +659,14 @@
     .clients-track{animation:none !important;}
   }
   @media(max-width:700px){
-    .clients-section{padding:40px 0 48px;}
-    .clients-track{gap:60px;}
-    .clients-track img{height:120px;}
-    .clients-track img[alt="Flowerpot"]{height:92px;}
+    .clients-section{padding:40px 0 16px;}
+    .clients-label{margin-bottom:14px;}
+    /* no hover on touch, so the default dim state needs to read clearly on its own */
+    .clients-track img{height:140px;margin-right:60px;opacity:.8;}
+    .clients-track img[alt="Flowerpot"]{height:108px;}
     .clients-track img[alt="Frontier"],
     .clients-track img[alt="Liisto"],
-    .clients-track img[alt="Oak Park"]{height:158px;}
+    .clients-track img[alt="Oak Park"]{height:184px;}
   }
 
   /* ===== VALUE SECTION ===== */
@@ -697,8 +676,7 @@
 
   @media(max-width:820px){
     .value-grid{grid-template-columns:1fr;}
-    h1.headline{font-size:56px;}
-    .hero-graphic{display:none;}
+    h1.headline{font-size:44px;}
   }
 
   /* ===== PROJECTS ===== */
@@ -996,62 +974,46 @@
   }
 
   /* ===== FOOTER ===== */
+  /* sizes measured from the reference footer: 40px side padding, ~50px tall,
+     12px text, 13px icons, 27px between every item */
   footer{
     position:relative;
-    padding:20px var(--pad) 60px;
+    padding:0 calc(var(--pad) + env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) calc(var(--pad) + env(safe-area-inset-left,0px));
     background:#0b0b0c;
-  }
-  footer::before{
-    content:"";
-    position:absolute;top:0;left:0;right:0;height:220px;
-    background:linear-gradient(180deg,
-      transparent 0%,
-      rgba(11,11,12,.25) 30%,
-      rgba(11,11,12,.6) 55%,
-      rgba(11,11,12,.88) 78%,
-      #0b0b0c 100%);
-    pointer-events:none;
+    border-top:1px solid rgba(255,255,255,.08);
   }
   .footer-card{
-    position:relative;
-    max-width:var(--maxw);margin:0 auto;
-    padding:24px 0 0;
+    display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:12px 27px;
+    padding:16px 0;
+    font-size:12px;line-height:17px;
+    color:#75757a;
   }
-  .footer-top{text-align:center;padding-bottom:56px;}
-  .footer-logo{width:150px;height:150px;margin:0 auto -24px;display:flex;align-items:center;justify-content:center;}
-  .footer-logo img{width:100%;height:100%;object-fit:contain;}
-  .footer-tagline{font-size:32px;font-weight:700;letter-spacing:-0.015em;line-height:1.25;max-width:620px;margin:0 auto;color:#fff;}
-  .footer-cols{
-    display:flex;justify-content:space-between;gap:40px;
-    padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.12);flex-wrap:wrap;
+  .footer-links{display:flex;align-items:center;gap:27px;}
+  .footer-links a{color:inherit;white-space:nowrap;transition:color .2s ease;}
+  .footer-links a:hover{color:#ffffff;}
+  .footer-links a:focus-visible{outline:2px solid #ffffff;outline-offset:4px;border-radius:2px;}
+  .footer-icon{position:relative;display:block;width:13px;height:13px;}
+  .footer-icon svg{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:17.3px;height:17.3px;
   }
-  .footer-desc{font-size:14px;color:#9a9a9e;max-width:230px;line-height:1.55;}
-  .footer-col-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9a9a9e;margin-bottom:18px;}
-  .footer-col a{display:block;font-size:14px;color:#cfcfd2;margin-bottom:13px;transition:color .2s ease;}
-  .footer-col a:hover{color:#fff;}
-  .footer-bottom{
-    display:flex;justify-content:space-between;align-items:center;
-    padding-top:28px;font-size:12.5px;color:#8a8a8e;flex-wrap:wrap;gap:12px;
-  }
-  .footer-bottom a{color:#8a8a8e;transition:color .2s ease;}
-  .footer-bottom a:hover{color:#fff;}
-  .footer-bottom-links{display:flex;gap:24px;}
+  .footer-icon--x svg{width:14.5px;height:14.5px;}
+  /* bigger tap area without changing the layout */
+  .footer-icon::after{content:"";position:absolute;inset:-8px;}
 
-  @media(max-width:700px){
-    .footer-card{padding:48px 0 0;}
-    .footer-tagline{font-size:24px;}
-    .footer-cols{
-      flex-direction:column;align-items:flex-start;
-      gap:36px;padding-bottom:32px;
-    }
-    .footer-desc{max-width:100%;}
-    .footer-col-label{margin-bottom:14px;}
-    .footer-col a{margin-bottom:11px;}
+  @media(max-width:600px){
+    footer{padding:0 20px;}
+    .footer-card{flex-direction:column-reverse;justify-content:center;gap:12px;padding:18px 0 22px;}
+    .footer-links{flex-wrap:wrap;justify-content:center;gap:12px 22px;}
   }
 
   /* ===== FLOATING CTA ===== */
   .floating-cta{
-    position:fixed;bottom:26px;right:26px;z-index:200;
+    position:fixed;
+    bottom:calc(26px + env(safe-area-inset-bottom,0px));
+    right:calc(26px + env(safe-area-inset-right,0px));
+    z-index:200;
     box-shadow:0 10px 30px rgba(0,0,0,.25);
     opacity:1;pointer-events:auto;
     transition:opacity .25s ease, transform .25s ease;
@@ -1087,7 +1049,6 @@
        logo, brand name, 3-line menu button, mode toggle --- */
     .nav-links{display:none;}
     .brand-name{display:inline-flex;margin-right:auto;padding-right:16px;}
-    .nav.scrolled .nav-links{max-width:0;}
     .nav-cta{display:none;}
     .nav-hamburger{display:inline-flex;width:32px;height:32px;}
     .theme-toggle{width:32px;height:32px;margin-left:3px;}
@@ -1098,20 +1059,31 @@
 
     /* --- vertical rhythm: 110px section padding is desktop-scaled --- */
     section{padding:64px 0;}
-    .hero{padding-top:104px;padding-bottom:44px;}
+    .hero{padding-top:140px;padding-bottom:44px;flex:none;}
     #services{padding-top:8px;padding-bottom:36px;}
     #work{padding-top:20px;padding-bottom:32px;}
     #process{padding:8px 0 56px;}
     #testimonials{padding:0 0 72px;}
     #faq{padding:0 0 72px;}
-    .hr{margin-top:56px;}
-    .feature-head{margin-top:64px;}
 
-    /* --- hero: headline was still 56px, and the CTA row could overflow --- */
-    h1.headline{font-size:38px;letter-spacing:-.02em;}
-    .hero-sub{font-size:15px;margin-top:24px;}
-    .hero-cta{flex-wrap:wrap;gap:16px 24px;margin-top:32px;}
-    .btn{padding:13px 20px;font-size:13px;}
+    /* --- hero: left-aligned layout (reference-style) instead of the desktop's
+       centered treatment — headline, sub and CTAs all anchor to the left edge --- */
+    .hero-inner{text-align:left;}
+    .hero .eyebrow{margin-bottom:16px;}
+    h1.headline{font-size:44px;line-height:1.15;letter-spacing:-.05em;max-width:none;margin:0;text-align:left;}
+    .headline-break{display:block;content:"";}
+    .hero-sub{font-size:15px;line-height:1.6;margin:20px 0 0;max-width:340px;text-align:left;}
+    .hero-cta{
+      display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;
+      gap:12px 24px;margin-top:28px;
+    }
+    .btn{padding:13px 20px;font-size:13px;box-shadow:0 10px 24px -10px rgba(0,0,0,.35);}
+
+    .hero-cta .btn-outline{
+      background:#fff;border:none;padding:13px 20px;box-shadow:0 10px 24px -10px rgba(0,0,0,.35);
+      color:#0b0b0c;font-weight:600;
+    }
+    .hero-cta .btn-outline:hover{background:#f0f0f0;color:#0b0b0c;}
 
     /* --- section headings, scaled down one more step for phone widths --- */
     .process-head h2{font-size:28px;}
@@ -1119,14 +1091,55 @@
     .proj-head h2{font-size:32px;}
     .cta-panel h2{font-size:34px;}
     .portfolio-head h1{font-size:34px;}
-    .footer-tagline{font-size:20px;}
 
     /* --- the floating "Start a project" pill duplicates the nav CTA and can
        collide with the mute buttons on video tiles at the same screen corner --- */
     .floating-cta{display:none;}
 
     /* --- slightly larger tap targets on touch screens --- */
-    .cs-mute-btn,.proj-mute,.mute-pill{padding:10px 14px;}
+    .cs-mute-btn,.proj-mute{padding:10px 14px;}
+  }
+
+  /* ===== TOUCH NAV (any device whose primary input can't hover — phones,
+     tablets, foldables) ===== */
+  /* The desktop nav reveals its links/CTA on :hover, which never fires on a
+     touchscreen — a tablet or foldable wider than 640px would otherwise show
+     a permanently-collapsed pill with no way to reach Home/Portfolio/Book a
+     Call. Route every non-hover-capable device to the same hamburger +
+     dropdown menu the phone breakpoint already uses, regardless of width. */
+  @media (hover:none) and (pointer:coarse){
+    .nav-links{display:none;}
+    .brand-name{display:inline-flex;margin-right:auto;padding-right:16px;}
+    .nav-cta{display:none;}
+    .nav-hamburger{display:inline-flex;}
+    .mobile-menu-backdrop{display:block;}
+    .mobile-menu{display:block;}
+  }
+
+  /* ===== EXTRA-SMALL SCREENS (narrow phones, folded foldables ~280–380px) === */
+  @media(max-width:380px){
+    :root{--pad:16px;}
+    .nav{padding:5px 5px 5px 6px;gap:4px;}
+    .brand-name{font-size:13px;padding-right:8px;}
+    .mark{width:30px;height:30px;}
+    .nav-hamburger,.theme-toggle{width:30px;height:30px;}
+
+    h1.headline{font-size:38px;letter-spacing:-.05em;}
+    .hero-sub{font-size:14px;margin-top:18px;max-width:none;}
+    .hero-cta{gap:10px 20px;margin-top:24px;}
+
+    .clients-track img{height:112px;margin-right:44px;}
+    .clients-track img[alt="Flowerpot"]{height:86px;}
+    .clients-track img[alt="Frontier"],
+    .clients-track img[alt="Liisto"],
+    .clients-track img[alt="Oak Park"]{height:148px;}
+
+    .portfolio-head h1{font-size:28px;}
+    .portfolio-wrap{padding:32px 16px 16px;}
+    .cs-tile h3{font-size:17px;}
+
+    .footer-card{gap:10px 14px;padding:14px 0;font-size:11.5px;}
+    .footer-links{gap:16px;row-gap:10px;}
   }
 
   /* ===== CONTACT ===== */
@@ -1226,15 +1239,6 @@
       <a href="#portfolio" class="nav-icon" id="navPortfolio" data-view="portfolio">
         <span class="nav-label">Portfolio</span>
       </a>
-      <a href="#process" class="nav-icon" id="navProcess" data-view="process">
-        <span class="nav-label">Process</span>
-      </a>
-      <a href="#faq" class="nav-icon" id="navFaq" data-view="faq">
-        <span class="nav-label">FAQ</span>
-      </a>
-      <a href="#contact" class="nav-icon" id="navContact" data-view="contact">
-        <span class="nav-label">Contact</span>
-      </a>
     </div>
     <button type="button" class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
       <span class="bar"></span><span class="bar"></span><span class="bar"></span>
@@ -1252,9 +1256,6 @@
   <div class="mobile-menu-inner">
     <a href="#top" class="mobile-menu-link active" id="mobileNavHome" data-view="home">Home</a>
     <a href="#portfolio" class="mobile-menu-link" id="mobileNavPortfolio" data-view="portfolio">Portfolio</a>
-    <a href="#process" class="mobile-menu-link" id="mobileNavProcess" data-view="process">Process</a>
-    <a href="#faq" class="mobile-menu-link" id="mobileNavFaq" data-view="faq">FAQ</a>
-    <a href="#contact" class="mobile-menu-link" id="mobileNavContact" data-view="contact">Contact</a>
     <div class="mobile-menu-divider"></div>
     <a href="#book" class="mobile-menu-cta" id="mobileNavBookCall">Book a Call</a>
   </div>
@@ -1265,534 +1266,35 @@
   <!-- HERO -->
   <section class="hero">
     <div class="wrap hero-inner">
-      <div class="hero-graphic">
-        <div class="shape-glow"></div>
-        <div class="shape-cube"></div>
-        <div class="shape-disc"></div>
-        <div class="shape-chip"></div>
-      </div>
-
-      <div class="eyebrow reveal">Independent motion studio · SaaS</div>
-      <h1 class="headline reveal"><span class="sf-bold">Your product's first impression —</span><br><span class="muted sf-medium">engineered in motion.</span></h1>
-      <p class="hero-sub reveal">We craft launch videos, product demos, and explainers that make ambitious software easier to understand — and impossible to scroll past.</p>
+      <div class="eyebrow reveal">Motion studio for SaaS</div>
+      <h1 class="headline reveal"><span class="sf-bold">You build it.</span> <span class="muted sf-medium">We make<br class="headline-break"> people watch it.</span></h1>
+      <p class="hero-sub reveal">Motion, explainers, and product videos for SaaS and tech companies who want conversions, not just views.</p>
 
       <div class="hero-cta reveal">
-        <a href="https://tally.so/r/RGrypl" target="_blank" rel="noopener" class="btn">
-          Start a project <span>→</span>
+        <a href="https://cal.com/adi-hjpcbf/30min" target="_blank" rel="noopener" class="btn">
+          Book a call
         </a>
-        <a href="#work" class="link-arrow">See selected work <span>↓</span></a>
+        <a href="#portfolio" class="btn btn-outline" id="heroPortfolioBtn">Portfolio</a>
       </div>
 
-      <hr class="hr">
+      <!-- OUR CLIENTS -->
+      <!-- Logo files are in the same folder as this HTML: client-flowerpot.png, client-frontier.png,
+           client-liisto.png, client-oakpark.png. Add more logos the same way — list each one only
+           once here, the script duplicates the row automatically for the seamless loop. -->
+      <section class="clients-section">
+        <div class="clients-label">Our clients</div>
+        <div class="clients-marquee">
+          <div class="clients-track" id="clientsTrack">
+            <img src="flowerpotred.png" alt="Flowerpot" decoding="async">
+            <img src="frontier logo-Photoroom.png" alt="Frontier" decoding="async">
+            <img src="liisto logo.png" alt="Liisto" decoding="async">
+            <img src="oak park nobg-Photoroom.png" alt="Oak Park" decoding="async">
+          </div>
+        </div>
+      </section>
 
-      <div class="feature-head">
-        <div class="feature-label">Featured work</div>
-        <div class="feature-tag">Motion Reel · 2026</div>
-      </div>
-
-      <div class="video-panel reveal load-reveal">
-        <video class="feature-video" src="launch.mp4" autoplay muted loop playsinline preload="metadata"></video>
-        <div class="glow"></div>
-        <button class="mute-pill" type="button">Unmute film</button>
-      </div>
     </div>
   </section>
-
-  <!-- OUR CLIENTS -->
-  <!-- Logo files are in the same folder as this HTML: client-flowerpot.png, client-frontier.png,
-       client-liisto.png, client-oakpark.png. Add more logos the same way — list each one only
-       once here, the script duplicates the row automatically for the seamless loop. -->
-  <section class="clients-section">
-    <div class="clients-label">Our clients</div>
-    <div class="clients-marquee">
-      <div class="clients-track" id="clientsTrack">
-        <img src="flowerpotred.png" alt="Flowerpot" loading="lazy" decoding="async">
-        <img src="frontier logo-Photoroom.png" alt="Frontier" loading="lazy" decoding="async">
-        <img src="liisto logo.png" alt="Liisto" loading="lazy" decoding="async">
-        <img src="oak park nobg-Photoroom.png" alt="Oak Park" loading="lazy" decoding="async">
-      </div>
-    </div>
-  </section>
-
-  <!-- SERVICES -->
-  <section id="services">
-    <div class="wrap">
-      <div class="svc-head reveal">
-        <div>
-          <div class="eyebrow">Services</div>
-          <h2>What do we offer?</h2>
-        </div>
-      </div>
-
-      <div class="svc-scroll">
-        <div class="svc-track">
-          <div class="svc-row reveal">
-            <div class="svc-num">01</div>
-            <h3>Launch Video</h3>
-            <p>A cinematic flagship video built to give your release clarity, confidence, and a real sense of occasion — the kind audiences actually remember.</p>
-            <div class="svc-best">Best for launches and<br>big updates</div>
-          </div>
-
-          <div class="svc-row reveal">
-            <div class="svc-num">02</div>
-            <h3>Product Demo</h3>
-            <p>A focused, visually sharp walkthrough that shows your product in motion — making the experience feel clear, useful, and effortless to follow.</p>
-            <div class="svc-best">Best for product pages<br>and sales</div>
-          </div>
-
-          <div class="svc-row reveal">
-            <div class="svc-num">03</div>
-            <h3>Explainer Video</h3>
-            <p>A clear visual story that turns complex features and ideas into moments that click instantly for any viewer.</p>
-            <div class="svc-best">Best for onboarding<br>and campaigns</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- VALUE -->
-  <section id="work">
-    <div class="wrap">
-      <div class="proj-head reveal">
-        <div>
-          <div class="eyebrow" style="margin-bottom:10px;">Selected work</div>
-          <h2>Recent projects</h2>
-        </div>
-        <div class="count-pill">03 projects</div>
-      </div>
-
-      <div class="proj-grid">
-        <div class="proj-card-big reveal">
-          <div class="proj-thumb" data-project="Liistoapp">
-            <svg class="proj-mark" viewBox="0 0 100 100" fill="none">
-              <circle cx="50" cy="50" r="46" stroke="white" stroke-width="4"/>
-              <path d="M72 28 L34 72" stroke="white" stroke-width="4" stroke-linecap="round"/>
-            </svg>
-            <video class="proj-video" muted loop playsinline preload="metadata"></video>
-            <button class="proj-mute" type="button">Play</button>
-          </div>
-          <div class="proj-meta">
-            <h3>Liistoapp</h3>
-            <div class="proj-cat">Featured explainer</div>
-            <div class="proj-desc">Product launch</div>
-          </div>
-        </div>
-
-        <div class="proj-col-right">
-          <div class="reveal">
-            <div class="proj-thumb small" data-project="Wise" style="background:linear-gradient(160deg,#7fb8e0,#3f6ea0);">
-              <video class="proj-video" muted loop playsinline preload="metadata"></video>
-              <button class="proj-mute" type="button">Play</button>
-            </div>
-            <div class="proj-meta">
-              <h3>Wise</h3>
-              <div class="proj-cat">Spec ad</div>
-              <div class="proj-desc">Personal project</div>
-            </div>
-          </div>
-
-          <div class="reveal">
-            <div class="grid-collage" data-project="Flowerpot">
-              <div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball"></div>
-              <div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball center">Idea</div><div class="collage-ball"></div><div class="collage-ball"></div>
-              <div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball"></div><div class="collage-ball"></div>
-              <video class="proj-video" muted loop playsinline preload="metadata"></video>
-              <button class="proj-mute" type="button">Play</button>
-            </div>
-            <div class="proj-meta">
-              <h3>Chatgpt x Ubereats</h3>
-              <div class="proj-cat">Feature Explainer</div>
-              <div class="proj-desc">Personal project</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PROCESS -->
-  <section id="process">
-    <div class="wrap">
-      <div class="process-head reveal">
-        <div class="process-eyebrow"><span></span>Process<span></span></div>
-        <h2>How a launch<br>actually gets built.</h2>
-        <p>Three phases, no agency theatre — just the work it takes to get your product its moment.</p>
-      </div>
-
-      <div class="process-carousel" id="processCarousel">
-        <div class="process-stage" id="processStage">
-
-          <div class="process-step active" data-index="0">
-            <div class="process-card">
-              <span class="process-ghost">01</span>
-              <div class="process-tag">Phase 01 / Discovery</div>
-              <h3>Understand the product</h3>
-              <p>We get into your product, your audience, and what this launch needs to do — then map the direction: tone, story, format, channels.</p>
-              <div class="process-meta">
-                <div class="process-meta-item">
-                  <span class="m-label">Deliverable</span>
-                  <span class="m-fill"></span>
-                  <span class="m-value">Brief + creative direction</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="process-step" data-index="1">
-            <div class="process-card">
-              <span class="process-ghost">02</span>
-              <div class="process-tag">Phase 02 / Direction</div>
-              <h3>Script &amp; storyboard</h3>
-              <p>We write a tight, retentive script and storyboard it scene-by-scene, locking voice and music early — so nothing about the edit is a surprise later.</p>
-              <div class="process-meta">
-                <div class="process-meta-item">
-                  <span class="m-label">Deliverable</span>
-                  <span class="m-fill"></span>
-                  <span class="m-value">Script + storyboard</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="process-step" data-index="2">
-            <div class="process-card">
-              <span class="process-ghost">03</span>
-              <div class="process-tag">Phase 03 / Craft</div>
-              <h3>Motion &amp; delivery</h3>
-              <p>Careful, frame-by-frame motion design — composition, pacing, sound — built to carry a story and push real numbers in the channels you run.</p>
-              <div class="process-meta">
-                <div class="process-meta-item">
-                  <span class="m-label">Deliverable</span>
-                  <span class="m-fill"></span>
-                  <span class="m-value">Final film + masters</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="process-nav">
-          <button class="process-arrow" id="processPrev" type="button" aria-label="Previous step">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <div class="process-indicators" id="processIndicators">
-            <button class="active" data-index="0" aria-label="Go to step 1"></button>
-            <button data-index="1" aria-label="Go to step 2"></button>
-            <button data-index="2" aria-label="Go to step 3"></button>
-          </div>
-          <button class="process-arrow" id="processNext" type="button" aria-label="Next step">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TESTIMONIALS -->
-  <!-- Same auto-scrolling marquee pattern as "Our clients" below. Every card uses the
-       same .testi-card markup (no stars, no featured/dark variant) — list each review
-       once here, the script duplicates the row automatically for the seamless loop. -->
-  <section id="testimonials">
-    <div class="wrap">
-      <div class="offers-head reveal">
-        <div class="offers-eyebrow"><span></span>What our clients think of us<span></span></div>
-        <h2>Real feedback,<br>real results.</h2>
-        <p>A few words from people we've worked with.</p>
-      </div>
-    </div>
-
-    <div class="testi-marquee reveal">
-      <div class="testi-track" id="testimonialsTrack">
-        <div class="testi-card">
-          <p class="testi-quote">"Good work and great attention to detail. Professional, creative, and delivered exactly what we needed."</p>
-          <div class="testi-person">
-            <div class="testi-avatar"><img src="liisto logo.png" alt="Rob" loading="lazy" decoding="async"></div>
-            <div>
-              <div class="testi-name">Rob</div>
-              <div class="testi-role">Liistoapp</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="testi-card">
-          <p class="testi-quote">"Excellent, excellent work! Pixelorylabis such a pleasure to work with and delivered beyond our means. He was very responsive and collaborative throughout the whole process and really helped bring our vision to life."</p>
-          <div class="testi-person">
-            <div class="testi-avatar"><img src="fp_red.png" alt="Miles" loading="lazy" decoding="async"></div>
-            <div>
-              <div class="testi-name">Milesflowerpot</div>
-              <div class="testi-role">Flowerpot</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="testi-card">
-          <p class="testi-quote">"Great to work with, responsive, easy to communicate with, and delivered solid sound design that matched the animation really well. Would definitely work together again."</p>
-          <div class="testi-person">
-            <div class="testi-avatar"><img src="photonic.jpg" alt="Shaikh Abdullah" loading="lazy" decoding="async"></div>
-            <div>
-              <div class="testi-name">Shaikh Abdullah</div>
-              <div class="testi-role">photonic_artistry</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="testi-card">
-          <p class="testi-quote">"Great work as always. Can't recommend Pixelorylab enough!"</p>
-          <div class="testi-person">
-            <div class="testi-avatar"><img src="fp_red.png" alt="Mimi" loading="lazy" decoding="async"></div>
-            <div>
-              <div class="testi-name">Mimi</div>
-              <div class="testi-role">Flowerpot</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section id="faq">
-    <div class="wrap">
-      <div class="faq-grid">
-        <div class="faq-left reveal">
-          <div class="faq-eyebrow"><span></span>FAQ</div>
-          <h2>Common<br><span class="dim">questions.</span></h2>
-          <p>Quick answers about services, pricing, and how we work — so you can decide whether to book a call.</p>
-        </div>
-
-        <div class="faq-list reveal">
-          <div class="faq-item">
-            <button class="faq-q">
-              <span class="faq-num">01</span>
-              <h3>What does Pixelorylab specialize in?</h3>
-              <span class="faq-plus"></span>
-            </button>
-            <div class="faq-a">
-              <div class="faq-a-inner">We specialize in motion graphics and video editing for SaaS brands, launch videos, product explainers, and ad creatives built to perform across your marketing channels.</div>
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q">
-              <span class="faq-num">02</span>
-              <h3>Who do you typically work with?</h3>
-              <span class="faq-plus"></span>
-            </button>
-            <div class="faq-a">
-              <div class="faq-a-inner">Mostly SaaS founders and marketing teams, along with branding studios and creators who need consistent, high-quality video content on a recurring basis. We built this service specifically for pre Series A SaaS companies that need premium looking content without enterprise budgets or long agency timelines.</div>
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q">
-              <span class="faq-num">03</span>
-              <h3>How does your process work?</h3>
-              <span class="faq-plus"></span>
-            </button>
-            <div class="faq-a">
-              <div class="faq-a-inner">After your 50% deposit, we send a structured intake form where you share your brief, brand assets, UI references (Figma links or screenshots), and any inspiration videos. Script is optional at this stage. We confirm the direction with you before production begins, then edit the full video. You review the draft via Frame.io, we apply your revisions across up to three rounds, and deliver the final file.</div>
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q">
-              <span class="faq-num">04</span>
-              <h3>What do you need from us to get started?</h3>
-              <span class="faq-plus"></span>
-            </button>
-            <div class="faq-a">
-              <div class="faq-a-inner">Your brief, brand assets (logo, fonts, colors, brand guidelines), any UI references such as Figma links or screenshots of your product, and inspiration videos that match the style you're after. A script is optional, if you don't have one, we'll write it together.</div>
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q">
-              <span class="faq-num">05</span>
-              <h3>How long does a project take?</h3>
-              <span class="faq-plus"></span>
-            </button>
-            <div class="faq-a">
-              <div class="faq-a-inner">Each video is delivered within 12-14 business days of receiving your completed assets. Retainer work runs on an ongoing cadence we agree on upfront.</div>
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q">
-              <span class="faq-num">06</span>
-              <h3>How many revisions are included?</h3>
-              <span class="faq-plus"></span>
-            </button>
-            <div class="faq-a">
-              <div class="faq-a-inner">Three revision rounds are included on every project. You review the draft via Frame.io and leave timestamped comments, we apply your changes across each round and deliver the final file once you're happy with it.</div>
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q">
-              <span class="faq-num">07</span>
-              <h3>How much does it cost?</h3>
-              <span class="faq-plus"></span>
-            </button>
-            <div class="faq-a">
-              <div class="faq-a-inner">Project based pricing runs from $400 to $5,000 per video depending on complexity. Retainer plans start at $1,400 per month for three videos, with priority turnaround. Get in touch for a quote.</div>
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-q">
-              <span class="faq-num">08</span>
-              <h3>Can you handle ongoing content needs?</h3>
-              <span class="faq-plus"></span>
-            </button>
-            <div class="faq-a">
-              <div class="faq-a-inner">Yes, our retainer offer is built for exactly this, with a steady cadence of videos and ad creatives at a discounted per-video rate and priority turnaround.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- BOOK A CALL (Cal.com) -->
-  <section id="book" style="padding-top:0;padding-bottom:0;scroll-margin-top:110px;">
-    <div class="wrap">
-      <div class="offers-head">
-        <div class="offers-eyebrow"><span></span>Apply to work with us<span></span></div>
-        <h2>Let's talk about<br><span class="dim">your project.</span></h2>
-        <p>Pick a time that works for you. We'll walk through your goals, the type of video you need, and what the process looks like from there.</p>
-      </div>
-      <div class="booking-panel">
-        <div id="cal-inline-booking" style="width:100%;height:100%;overflow:auto;"></div>
-      </div>
-    </div>
-  </section>
-  <script type="text/javascript">
-    (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-    Cal("init", "30min", {origin:"https://cal.com"});
-
-    var calTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-
-    Cal.ns["30min"]("inline", {
-      elementOrSelector:"#cal-inline-booking",
-      config: {"layout":"month_view", "theme":calTheme},
-      calLink: "adi-hjpcbf/30min",
-    });
-
-    Cal.ns["30min"]("ui", {"hideEventTypeDetails":false,"layout":"month_view","theme":calTheme});
-  </script>
-
-  <!-- CONTACT -->
-  <section id="contact" style="padding-top:140px;scroll-margin-top:110px;">
-    <div class="wrap">
-      <div class="offers-head">
-        <div class="offers-eyebrow"><span></span>Contact<span></span></div>
-        <h2>Let's start<br><span class="dim">a conversation.</span></h2>
-        <p>You can contact me using the form or via the links below.</p>
-      </div>
-
-      <div class="contact-card">
-        <form id="contactForm">
-          <div class="contact-row">
-            <input class="contact-field" type="text" id="contactName" name="from_name" placeholder="Name" required>
-            <input class="contact-field" type="email" id="contactEmail" name="from_email" placeholder="Email" required>
-          </div>
-          <textarea class="contact-field" id="contactMessage" name="message" placeholder="Message" required></textarea>
-
-          <div class="contact-foot">
-            <button type="submit" class="btn" id="contactSubmit">Send message</button>
-            <div class="contact-hint">or <kbd>↵</kbd> Enter to send</div>
-          </div>
-
-          <div class="contact-status" id="contactStatus"></div>
-        </form>
-
-        <div class="contact-socials">
-          <a class="contact-social-link" href="https://x.com/Pixelorylab" target="_blank" rel="noopener">
-            <span class="contact-social-left">
-              <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-6.9l-5.4-7-6.2 7H1.7l8.1-9.3L1 2h7.1l4.9 6.5L18.9 2Zm-1.2 18h1.9L7.4 4h-2l12.3 16Z"/></svg>
-              X.com
-            </span>
-            <span class="contact-social-right">
-              @Pixelorylab
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
-            </span>
-          </a>
-          <a class="contact-social-link" href="https://www.instagram.com/pixelorylab/" target="_blank" rel="noopener">
-            <span class="contact-social-left">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg>
-              Instagram
-            </span>
-            <span class="contact-social-right">
-              @pixelorylab
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
-            </span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- EmailJS — https://www.emailjs.com/
-       1. Sign up, add an Email Service, and create a Template with
-          variables {{from_name}}, {{from_email}}, {{message}} (these
-          match the "name" attributes on the fields above).
-       2. Replace the three placeholders below with your own
-          Public Key, Service ID, and Template ID from the EmailJS dashboard. -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script type="text/javascript">
-    (function(){
-      emailjs.init({ publicKey: "ulbB_toqZ6ema_REm" });
-
-      const EMAILJS_SERVICE_ID = "service_cdqie0i";
-      const EMAILJS_TEMPLATE_ID = "template_50p7pxj";
-
-      const form = document.getElementById('contactForm');
-      const submitBtn = document.getElementById('contactSubmit');
-      const status = document.getElementById('contactStatus');
-
-      function setStatus(msg, ok){
-        status.textContent = msg;
-        status.classList.remove('ok','err');
-        status.classList.add('show', ok ? 'ok' : 'err');
-      }
-
-      function sendForm(){
-        if(!form.reportValidity()) return;
-        const originalLabel = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending...';
-
-        emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, form)
-          .then(() => {
-            setStatus("Message sent — I'll get back to you soon.", true);
-            form.reset();
-          })
-          .catch((err) => {
-            setStatus("Something went wrong, please try again or email me directly.", false);
-            console.error('EmailJS error:', err);
-          })
-          .finally(() => {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalLabel;
-          });
-      }
-
-      form.addEventListener('submit', function(e){
-        e.preventDefault();
-        sendForm();
-      });
-
-      // Enter to send (Shift+Enter still makes a new line in the message box)
-      form.addEventListener('keydown', function(e){
-        if(e.key === 'Enter' && !e.shiftKey){
-          e.preventDefault();
-          sendForm();
-        }
-      });
-    })();
-  </script>
 
   </main>
 
@@ -1856,38 +1358,20 @@
 
 <footer id="siteFooter">
   <div class="footer-card">
-    <div class="footer-top">
-      <div class="footer-logo">
-        <img src="white logo-Photoroom.png" alt="Pixelorylab" loading="lazy" decoding="async">
-      </div>
-      <div class="footer-tagline">For ambitious products.<br>Told better.</div>
-    </div>
-
-    <div class="footer-cols">
-      <div class="footer-col">
-        <div class="footer-desc">Product storytelling for SaaS, AI &amp; tech.</div>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-label">Sections</div>
-        <a href="#work" id="footerWorkLink">Work</a>
-        <a href="#testimonials" id="footerOffersLink">Reviews</a>
-        <a href="#portfolio" id="footerPortfolioLink">Portfolio</a>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-label">Get in touch</div>
-        <a href="https://x.com/Pixelorylab" target="_blank" rel="noopener">X / Twitter</a>
-        <a href="https://www.instagram.com/pixelorylab/" target="_blank" rel="noopener">Instagram</a>
-        <a href="https://cal.com/adi-hjpcbf/30min" target="_blank" rel="noopener">Book a call</a>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <div>© Pixelorylab 2026 — All rights reserved.</div>
-      <div class="footer-bottom-links">
-        <a href="mailto:pixelorylab@gmail.com">Email</a>
-        <a href="https://www.instagram.com/pixelorylab/" target="_blank" rel="noopener">Instagram</a>
-        <a href="#top" id="footerBackTop">Back to top ↑</a>
-      </div>
+    <span>© 2026 Pixelorylab</span>
+    <div class="footer-links">
+      <a href="#top" id="footerHomeLink">Home</a>
+      <a href="#portfolio" id="footerPortfolioLink">Portfolio</a>
+      <a href="https://cal.com/adi-hjpcbf/30min" target="_blank" rel="noopener">Book a call</a>
+      <a class="footer-icon" href="mailto:pixelorylab@gmail.com" aria-label="Email Pixelorylab" title="Email">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>
+      </a>
+      <a class="footer-icon" href="https://www.instagram.com/pixelorylab/" target="_blank" rel="noopener" aria-label="Pixelorylab on Instagram" title="Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></svg>
+      </a>
+      <a class="footer-icon footer-icon--x" href="https://x.com/Pixelorylab" target="_blank" rel="noopener" aria-label="Pixelorylab on X" title="X">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
     </div>
   </div>
 </footer>
@@ -1962,13 +1446,13 @@
   // Portfolio page — "Case studies" grid
   const PROJECT_VIDEOS = {
     1: { file: "liisto.mp4", title: "Liistoapp", desc: "Product Launch Video" },
-    2: { file: "wise.mp4", title: "Wise", desc: "Personal Project" },
-    3: { file: "flowerpot.mp4", title: "Flowerpot.nyc", desc: "Motion Graphics Video for the Hero Page of Website" },
-    4: { file: "11labs marketplace.mp4", title: "Elevenlabs", desc: "Personal Project" },
-    5: { file: "predix.mp4", title: "Predix", desc: "Personal Project" },
-    6: { file: "Spotify 2.0.mp4", title: "Spotify 2.0", desc: "Personal Project" },
-    7: { file: "Google Gemini SAAS.mp4", title: "Google Gemini", desc: "Personal Project" },
-    8: { file: "chatgpt x ubereats.mp4", title: "Chatgpt x Ubereats", desc: "Personal Project" }
+    2: { file: "chatgpt x ubereats.mp4", title: "Chatgpt x Ubereats", desc: "Personal Project" },
+    3: { file: "11labs marketplace.mp4", title: "Elevenlabs", desc: "Personal Project" },
+    4: { file: "Google Gemini SAAS.mp4", title: "Google Gemini", desc: "Personal Project" },
+    5: { file: "stripe.mp4", title: "Stripe", desc: "Personal Project" },
+    6: { file: "predix.mp4", title: "Predix", desc: "Personal Project" },
+    7: { file: "Spotify 2.0.mp4", title: "Spotify 2.0 Concept", desc: "Personal Project" },
+    8: { file: "flowerpot.mp4", title: "Flowerpot.nyc", desc: "Motion Graphics Video for the Hero Page of Website" }
   };
 
   // tracks every wired-up video so unmuting one can mute the rest
@@ -2260,46 +1744,6 @@
     }
   }, {passive:true});
 
-  // hero featured-video blur-to-clear on scroll (hero only)
-  const heroVideoPanel = document.querySelector('.hero .video-panel');
-  if(heroVideoPanel){
-    const HERO_BLUR_MAX = 12.6;    // px of blur at the very top of the page
-    const HERO_BLUR_RANGE = 320;   // px of scroll before it's fully sharp
-    let heroBlurTicking = false;
-    const updateHeroBlur = () => {
-      const progress = Math.min(Math.max(window.scrollY / HERO_BLUR_RANGE, 0), 1);
-      const blur = HERO_BLUR_MAX * (1 - progress);
-      heroVideoPanel.style.setProperty('--hero-blur', blur.toFixed(2) + 'px');
-      heroBlurTicking = false;
-    };
-    window.addEventListener('scroll', () => {
-      if(!heroBlurTicking){
-        requestAnimationFrame(updateHeroBlur);
-        heroBlurTicking = true;
-      }
-    }, {passive:true});
-    updateHeroBlur();
-  }
-
-  // featured video panel — starts muted+looping automatically; both the
-  // pill and the whole video panel toggle sound (clicking the pill doesn't
-  // double-toggle since the click is stopped from bubbling to the panel)
-  const featureVideoPanel = document.querySelector('.video-panel');
-  const featureVideo = document.querySelector('.video-panel .feature-video');
-  const featureMutePill = document.querySelector('.video-panel .mute-pill');
-  if(featureVideo && featureMutePill && featureVideoPanel){
-    featureVideo.play().catch(() => {});
-    const toggleFeatureMute = () => {
-      featureVideo.muted = !featureVideo.muted;
-      featureMutePill.textContent = featureVideo.muted ? 'Unmute film' : 'Mute film';
-    };
-    featureMutePill.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleFeatureMute();
-    });
-    featureVideoPanel.addEventListener('click', toggleFeatureMute);
-  }
-
   // scroll reveal
   const revealEls = document.querySelectorAll('.reveal:not(.load-reveal)');
   const io = new IntersectionObserver((entries) => {
@@ -2356,7 +1800,7 @@
   const floatingCta = document.getElementById('floatingCta');
 
   // The floating CTA is fixed to the bottom-right corner, which is the same
-  // spot the footer's last row of links (Instagram / Back to top) ends up
+  // spot the footer's links end up
   // in once you scroll to the bottom — so it was sitting on top of them
   // and eating their clicks. Fade/disable it whenever the footer is on screen.
   if(footerEl && floatingCta){
@@ -2364,7 +1808,7 @@
       entries.forEach(entry => {
         floatingCta.classList.toggle('cta-hide', entry.isIntersecting);
       });
-    }, {threshold:0, rootMargin:'0px 0px -10% 0px'});
+    }, {threshold:0, rootMargin:'0px'});
     ctaFooterObserver.observe(footerEl);
   }
   const portfolioView = document.getElementById('portfolioView');
@@ -2443,41 +1887,22 @@
     e.preventDefault();
     navigateTo('portfolio');
   });
+  const heroPortfolioBtn = document.getElementById('heroPortfolioBtn');
+  if(heroPortfolioBtn){
+    heroPortfolioBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo('portfolio');
+    });
+  }
   navHome.addEventListener('click', (e) => {
     e.preventDefault();
     navigateTo('home');
-  });
-  const navProcess = document.getElementById('navProcess');
-  navProcess.addEventListener('click', (e) => {
-    e.preventDefault();
-    // Process always plays the full slide-up transition/reveal, whether coming
-    // from the Portfolio view or scrolling to it again from the Home page.
-    navigateTo('home', 'process');
-  });
-  const navFaq = document.getElementById('navFaq');
-  navFaq.addEventListener('click', (e) => {
-    e.preventDefault();
-    if(document.body.classList.contains('portfolio-active')){
-      // currently on the Portfolio view — switch to Home instantly, then just scroll to FAQ
-      showView('home');
-      requestAnimationFrame(() => {
-        document.getElementById('faq').scrollIntoView({behavior:'smooth', block:'start'});
-      });
-    } else {
-      document.getElementById('faq').scrollIntoView({behavior:'smooth', block:'start'});
-    }
   });
   const navBookCall = document.getElementById('navBookCall');
   navBookCall.addEventListener('click', (e) => {
     e.preventDefault();
     // Book a Call also always plays the full slide-up transition/reveal.
     navigateTo('home', 'book');
-  });
-  const navContact = document.getElementById('navContact');
-  navContact.addEventListener('click', (e) => {
-    e.preventDefault();
-    // Contact also always plays the full slide-up transition/reveal.
-    navigateTo('home', 'contact');
   });
   const portfolioGetInTouch = document.getElementById('portfolioGetInTouch');
   if(portfolioGetInTouch){
@@ -2525,9 +1950,6 @@
   const mobileNavMap = [
     ['mobileNavHome', navHome],
     ['mobileNavPortfolio', navPortfolio],
-    ['mobileNavProcess', navProcess],
-    ['mobileNavFaq', navFaq],
-    ['mobileNavContact', navContact],
     ['mobileNavBookCall', navBookCall],
   ];
   mobileNavMap.forEach(([mobileId, desktopEl]) => {
@@ -2554,40 +1976,57 @@
   }
 
   // ===== Our clients marquee =====
-  // Repeats the logo row enough times to comfortably fill (2x) the visible
-  // width, then scrolls by exactly half the total track width — since every
-  // copy is identical, that half-width scroll loops with zero visible seam,
-  // no matter how few/narrow the source logos are.
+  // Builds a track of identical copies of the logo row, always at least 2x the
+  // visible width, and scrolls it by exactly half. Because every copy is the
+  // same width (spacing is a margin on each logo, so the last logo of a copy
+  // carries its gap too), the loop point lands exactly on a copy boundary:
+  // no seam, no empty stretch, at any screen size and however few logos exist.
+  // Logo widths are only known once the images load, so the row is rebuilt
+  // whenever a logo finishes loading and on resize. Originals are never
+  // replaced, only the clones after them.
   (function setupClientsMarquee(){
     const track = document.getElementById('clientsTrack');
     if(!track) return;
     const marquee = track.parentElement;
-    const originalHTML = track.innerHTML;
-    const imgs = Array.from(track.querySelectorAll('img'));
+    const originals = Array.from(track.querySelectorAll('img'));
+    const PX_PER_SECOND = 55;
 
     function build(){
-      track.innerHTML = originalHTML;
-      const setWidth = track.scrollWidth;
+      track.querySelectorAll('img[data-clone]').forEach(el => el.remove());
+      const setWidth = track.scrollWidth;          // one full copy, trailing gap included
+      if(!setWidth) return;
       const containerWidth = marquee.offsetWidth || window.innerWidth;
-      if(setWidth === 0) return;
       let copies = Math.max(2, Math.ceil((containerWidth * 2) / setWidth));
-      if(copies % 2 !== 0) copies++;
+      if(copies % 2 !== 0) copies++;               // even count so "half" is a whole number of copies
+      const frag = document.createDocumentFragment();
       for(let i = 1; i < copies; i++){
-        track.insertAdjacentHTML('beforeend', originalHTML);
+        originals.forEach(img => {
+          const clone = img.cloneNode(true);
+          clone.setAttribute('data-clone', '');
+          clone.setAttribute('aria-hidden', 'true');
+          frag.appendChild(clone);
+        });
       }
-      const totalWidth = track.scrollWidth;
-      const pxPerSecond = 55;
-      const duration = (totalWidth / 2) / pxPerSecond;
+      track.appendChild(frag);
+      const duration = (setWidth * copies / 2) / PX_PER_SECOND;
       track.style.animation = `clients-scroll ${duration}s linear infinite`;
     }
 
-    const decode = imgs.map(img => img.decode ? img.decode().catch(() => {}) : Promise.resolve());
-    const runBuild = () => Promise.all(decode).then(build);
-    // defer off the initial-load main-thread work; runs once the browser
-    // is idle (or after 2s at the latest) instead of competing with
-    // first paint / hero content
-    if ('requestIdleCallback' in window) requestIdleCallback(runBuild, { timeout: 2000 });
-    else setTimeout(runBuild, 200);
+    let rebuildQueued = false;
+    function queueBuild(){
+      if(rebuildQueued) return;
+      rebuildQueued = true;
+      requestAnimationFrame(() => { rebuildQueued = false; build(); });
+    }
+
+    build();                                       // right away, so there is never an unfilled track
+    originals.forEach(img => {
+      if(!img.complete){
+        img.addEventListener('load', queueBuild, { once: true });
+        img.addEventListener('error', queueBuild, { once: true });
+      }
+    });
+    window.addEventListener('load', queueBuild);
     window.addEventListener('resize', () => {
       clearTimeout(window.__clientsMarqueeResizeT);
       window.__clientsMarqueeResizeT = setTimeout(build, 200);
@@ -2639,22 +2078,11 @@
     });
   })();
 
-  document.getElementById('footerBackTop').addEventListener('click', (e) => {
-    e.preventDefault();
-    navigateTo('home');
-  });
-  const footerWorkLink = document.getElementById('footerWorkLink');
-  if(footerWorkLink){
-    footerWorkLink.addEventListener('click', (e) => {
+  const footerHomeLink = document.getElementById('footerHomeLink');
+  if(footerHomeLink){
+    footerHomeLink.addEventListener('click', (e) => {
       e.preventDefault();
-      navigateTo('home', 'work');
-    });
-  }
-  const footerOffersLink = document.getElementById('footerOffersLink');
-  if(footerOffersLink){
-    footerOffersLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      navigateTo('home', 'testimonials');
+      navigateTo('home');
     });
   }
   const footerPortfolioLink = document.getElementById('footerPortfolioLink');
