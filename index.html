@@ -1485,6 +1485,22 @@
   .ts-avatar.fill img{object-fit:cover;padding:0;}
   /* holder stays the standard 36px; only the logo inside is enlarged (clipped by the holder if it overflows) */
   .ts-avatar.ts-lg img{padding:0;transform:scale(1.5);}
+
+  /* testimonial cards: short quote by default, chevron reveals the full text */
+  .ts-quote.ts-full{display:none;}
+  .ts-card.is-open .ts-quote.ts-short{display:none;}
+  .ts-card.is-open .ts-quote.ts-full{display:block;animation:tsReveal .35s ease;}
+  @keyframes tsReveal{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+  .ts-toggle{
+    margin-left:auto;flex-shrink:0;width:30px;height:30px;border-radius:50%;padding:0;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;background:transparent;border:0;color:var(--gray-500);
+    transition:color .2s ease,background .2s ease;
+  }
+  .ts-toggle:hover{color:var(--accent);background:rgba(255,255,255,.06);}
+  .ts-toggle:focus-visible{outline:1.5px solid var(--accent);outline-offset:2px;}
+  .ts-toggle svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s ease;}
+  .ts-card.is-open .ts-toggle svg{transform:rotate(180deg);}
+  @media (prefers-reduced-motion:reduce){.ts-card.is-open .ts-quote.ts-full{animation:none;}}
   .ts-name{font-size:14px;font-weight:600;color:var(--ink);line-height:1.3;}
   .ts-role{font-size:12.5px;color:var(--gray-500);line-height:1.3;}
 
@@ -2316,20 +2332,23 @@
       </svg>
 
       <article class="ts-card ts-a">
-        <p class="ts-quote">“He understood our vision for ViewLAND and <strong>brought it to life with a high-quality, professional animation.</strong> Communication was excellent throughout, and he was always receptive to feedback. Would definitely recommend him!”</p>
-        <div class="ts-person"><div class="ts-avatar fill"><img src="viewland testimonial logo.png" alt="ViewLand"></div><div><div class="ts-name">Ali Koseoglu</div><div class="ts-role">Founder, ViewLAND</div></div></div>
+        <p class="ts-quote ts-short">“He understood our vision for ViewLAND and <strong>brought it to life with a high-quality, professional animation..</strong>”</p>
+        <p class="ts-quote ts-full">“He understood our vision for ViewLAND and <strong>brought it to life with a high-quality, professional animation.</strong> Communication was excellent throughout, and he was always receptive to feedback. Would definitely recommend him!”</p>
+        <div class="ts-person"><div class="ts-avatar fill"><img src="viewland testimonial logo.png" alt="ViewLand"></div><div><div class="ts-name">Ali Koseoglu</div><div class="ts-role">Founder, ViewLAND</div></div><button type="button" class="ts-toggle" aria-expanded="false" aria-label="Read full testimonial"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5.25 7 9.25l4-4"/></svg></button></div>
       </article>
 
       <div class="ts-more" id="tsMore">
         <div class="ts-more-inner">
       <article class="ts-card ts-b">
-        <p class="ts-quote">“Excellent, excellent work! Adi is such a pleasure to work with and <strong>delivered beyond our means.</strong> He was very responsive and collaborative throughout the whole process and really helped bring our vision to life.”</p>
-        <div class="ts-person"><div class="ts-avatar"><img src="fp_white.png" alt="Flowerpot"></div><div><div class="ts-name">Miles</div><div class="ts-role">Founder, Flowerpot</div></div></div>
+        <p class="ts-quote ts-short">“Excellent, excellent work! Adi is such a pleasure to work with and <strong>delivered beyond our means..</strong>”</p>
+        <p class="ts-quote ts-full">“Excellent, excellent work! Adi is such a pleasure to work with and <strong>delivered beyond our means.</strong> He was very responsive and collaborative throughout the whole process and really helped bring our vision to life.”</p>
+        <div class="ts-person"><div class="ts-avatar"><img src="fp_white.png" alt="Flowerpot"></div><div><div class="ts-name">Miles</div><div class="ts-role">Founder, Flowerpot</div></div><button type="button" class="ts-toggle" aria-expanded="false" aria-label="Read full testimonial"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5.25 7 9.25l4-4"/></svg></button></div>
       </article>
 
       <article class="ts-card ts-c">
-        <p class="ts-quote">“Amazing explainer video that <strong>showcased the right benefits and features of my product well.</strong>”</p>
-        <div class="ts-person"><div class="ts-avatar ts-lg"><img src="liisto logo.png" alt="Liisto"></div><div><div class="ts-name">Rob</div><div class="ts-role">Founder, Liisto</div></div></div>
+        <p class="ts-quote ts-short">“Working with Adi on a client video project was a great experience. <strong>The quality of work was amazing, and he delivered the initial draft in just a couple of days..</strong>”</p>
+        <p class="ts-quote ts-full">“Working with Adi on a client video project was a great experience. <strong>The quality of work was amazing, and he delivered the initial draft in just a couple of days.</strong> Even when timeline delays popped up on our client's end, he adapted seamlessly and handled every revision without hesitation. Highly recommended!”</p>
+        <div class="ts-person"><div class="ts-avatar"><img src="across logo.png" alt="Across"></div><div><div class="ts-name">Across X Uniswap</div></div><button type="button" class="ts-toggle" aria-expanded="false" aria-label="Read full testimonial"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5.25 7 9.25l4-4"/></svg></button></div>
       </article>
         </div>
       </div>
@@ -3449,7 +3468,7 @@
 <script>
 // ===== SHOWREEL (testimonials frame) =====
 // To swap in the final reel later: save it next to this HTML file and change the filename below.
-const SHOWREEL_FILE = "Showreel Pixelorylab.mp4";
+const SHOWREEL_FILE = "showreel pixelorylab.mp4";
 (function(){
   const frame = document.getElementById('showreel');
   const video = document.getElementById('showreelVideo');
@@ -3807,6 +3826,19 @@ const INTRO_CONFIG = {
     d.addEventListener('click',function(){
       var delta=centerOf(cards[i])-centerOf(track);
       track.scrollTo({left:track.scrollLeft+delta,behavior:'smooth'});
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  document.querySelectorAll('#client-words .ts-toggle').forEach(function(b){
+    b.addEventListener('click',function(){
+      var card=b.closest('.ts-card');
+      var open=card.classList.toggle('is-open');
+      b.setAttribute('aria-expanded',open?'true':'false');
+      b.setAttribute('aria-label',open?'Show less':'Read full testimonial');
     });
   });
 })();
